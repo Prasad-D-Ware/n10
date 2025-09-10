@@ -44,11 +44,18 @@ model Credential {
   id          String @unique @default(cuid())
   user_id     String
   name        String @default("Untitled Credential")
-  application String
+  application Applications
   data        Json
 
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
 
   user User @relation(fields: [user_id], references: [id])
+}
+
+enum Applications{
+  whatsapp
+  openai
+  telegram
+  resend
 }

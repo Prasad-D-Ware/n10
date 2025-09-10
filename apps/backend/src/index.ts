@@ -1,6 +1,7 @@
 import express from "express";
 import authRouter from "./routers/auth.routers";
 import cors from "cors";
+import credentialRouter from "./routers/credential.router";
 
 const app = express();
 
@@ -11,6 +12,7 @@ app.use(cors({
 }));
 
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/credentials", credentialRouter);
 
 app.listen(3000,()=> {
     console.log("Server running on 3000")
