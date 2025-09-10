@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String @unique @default(cuid())
+  email    String @unique
+  password String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+
+  workflows   Workflow[]
+  credentials Credential[]
+}
+
+model Workflow {
+  id      String  @unique @default(cuid())
+  user_id String
+  name    String  @default("Untitled Workflow")
+  enabled Boolean @default(false)
+  nodes   Json
+  edges   Json
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id])
+}
+
+model Credential {
+  id          String @unique @default(cuid())
+  user_id     String
+  name        String @default("Untitled Credential")
+  application String
+  data        Json
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id])
+}
