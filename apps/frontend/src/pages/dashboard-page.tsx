@@ -16,17 +16,65 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import ResendCredential from "@/components/resend-credential"
+import WpCredentials from "@/components/wp-credentials";
+import TgCredentials from "@/components/tg-credentials";
+import OpenAICredentials from "@/components/openai-credentials";
+import { Input } from "@/components/ui/input";
+import axios from "axios";
+import { toast } from "sonner";
 
-const applications = [
+const demoApplications = [
   { key: "telegram", name: "Telegram" },
   { key: "whatsapp", name: "WhatsApp" },
   { key: "openai", name: "OpenAI" },
+  { key: "resend", name: "Resend (Mail)" },
 ];
 
 const DashBoardPage = () => {
   const navigate = useNavigate();
+  const [applications] = useState(demoApplications);
   const [selectedApp, setSelectedApp] = useState("");
+  const [credName,setCredName] = useState("");
+  const [credData,setCredData] = useState({});
+
+  useEffect(()=>{
+    fetchAllCredentials();
+  },[])
+
+  const fetchAllCredentials = async() => {
+    const response = await axios.get("http://localhost:3000/api/v1/credentials/create");
+
+    const data = response.data;
+
+    if(!data.success){
+      toast.error(data.message);
+      console.log(data.error);
+      return;
+    }
+
+    toast.success(data.message);
+    // TODO : set exisiting credentials that can show under credentials tab
+  }
+
+  const handleCreateCredentials = async() => {
+      const response = await axios.post("http://localhost:3000/api/v1/credentials/create",{
+        name : credName,
+        application : selectedApp,
+        data : credData
+      })
+
+      const data = response.data;
+
+      if(!data.success){
+        toast.error(data.message);
+        console.log(data.error);
+        return;
+      }
+
+      toast.success(data.message);
+  }
   return (
     <div className="m-16 mx-auto max-w-7xl w-full">
       <div className="flex justify-between">
@@ -46,27 +94,38 @@ const DashBoardPage = () => {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle className="font-kode font-bold">Select Application</DialogTitle>
+                <DialogTitle className="font-kode font-bold">
+                  Select Application
+                </DialogTitle>
                 <DialogDescription>
-                  <Select onValueChange={(value) => setSelectedApp(value)} value={selectedApp}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Application" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {applications.map((app) => (
-                        <SelectItem key={app.key} value={app.key}>
-                          {app.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <div className="mt-3 font-inter">
-                  {selectedApp === "openai" && <div>TODO : openai data</div>}
-                  {selectedApp === "telegram" && <div>TODO : telegram data</div>}
-                  {selectedApp === "whatsapp" && <div>TODO : whatsapp data</div>}
-                  </div>
+                  Choose an application to create credentials for
                 </DialogDescription>
               </DialogHeader>
+              <div className="space-y-4">
+                <Select
+                  onValueChange={(value) => setSelectedApp(value)}
+                  value={selectedApp}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Application" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {applications.map((app) => (
+                      <SelectItem key={app.key} value={app.key}>
+                        {app.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="space-y-3 font-inter">
+                  <Input placeholder="Credential Name" value={credName} onChange={(e)=> setCredName(e.target.value)}/>
+                  {selectedApp === "openai" && <OpenAICredentials onDataChange={setCredData}/>}
+                  {selectedApp === "telegram" && <TgCredentials onDataChange={setCredData}/>}
+                  {selectedApp === "whatsapp" && <WpCredentials onDataChange={setCredData}/>}
+                  {selectedApp === "resend" && <ResendCredential onDataChange={setCredData}/>}
+                  <Button className="font-kode w-full" onClick={handleCreateCredentials}>Create Credential</Button>
+                </div>
+              </div>
             </DialogContent>
           </Dialog>
         </div>

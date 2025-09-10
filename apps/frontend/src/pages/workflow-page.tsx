@@ -47,7 +47,7 @@ const WorkflowPage = () => {
         </div>
       </div>
 
-      <div className="w-full h-full">
+      <div className="w-full h-full pb-2">
         <ReactFlow
           nodes={nodes}
           edges={edges}
