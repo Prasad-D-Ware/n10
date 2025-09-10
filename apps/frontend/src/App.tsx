@@ -8,10 +8,12 @@ import { SidebarProvider } from "./components/ui/sidebar";
 import { AppSidebar } from "./components/app-sidebar";
 import WorkflowPage from "./pages/workflow-page";
 import { ThemeProvider } from "./components/theme-provider";
+import { Toaster } from "sonner";
 
 function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <Toaster/>
       <SidebarProvider>
         <Routes>
           <Route element={<Landing />} path="/" />

@@ -3,6 +3,8 @@ import { Input } from "@/components/ui/input"
 import { useState, useCallback } from 'react';
 import { ReactFlow, applyNodeChanges, applyEdgeChanges, addEdge, Background, Controls, Panel } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { useTheme } from "@/components/theme-provider";
+import SlideToggle from "@/components/toggle-slider";
  
 const initialNodes = [
   { id: 'n1', position: { x: 0, y: 0 }, data: { label: 'Node 1' } },
@@ -13,6 +15,8 @@ const initialEdges = [{ id: 'n1-n2', source: 'n1', target: 'n2' }];
 const WorkflowPage = () => {
   const [nodes, setNodes] = useState(initialNodes);
   const [edges, setEdges] = useState(initialEdges);
+  const [enable,setEnable] = useState(false);
+  const { theme } = useTheme();
  
   const onNodesChange = useCallback(
     (changes : any) => setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot)),
@@ -35,9 +39,11 @@ const WorkflowPage = () => {
           <div className="font-kode font-bold">Workflow </div>
           <Input placeholder="workflow name" className="border-transparent"/>
         </div>
-        <div className="flex gap-5">
-
-          <Button className="font-kode">Save</Button>
+        <div className="flex items-center  gap-5">
+        <div className="font-inter flex gap-2 items-center ">Enabled  : <SlideToggle setEnable={setEnable} />
+          <span className="ml-2 text-sm opacity-70">{enable ? 'On' : 'Off'}</span>
+        </div>
+          <Button className="font-kode font-bold">Save</Button>
         </div>
       </div>
 
@@ -49,8 +55,9 @@ const WorkflowPage = () => {
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           fitView
+          colorMode={theme}
         >
-          <Panel position="top-center" className="bg-white font-kode px-2 py-1 border border-black  rounded-md">Workflow Editor</Panel>
+          <Panel position="top-center" className="bg-white font-kode px-2 py-1 border border-black  rounded-md dark:text-black">Workflow Editor</Panel>
               <Background />
               <Controls/>
         </ReactFlow>
