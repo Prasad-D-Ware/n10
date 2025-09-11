@@ -36,14 +36,14 @@ const WorkflowPage = () => {
       {/* Header*/}
       <div className="flex h-16 items-center justify-between ">
         <div className="flex gap-2 items-center">
-          <div className="font-kode font-bold">Workflow </div>
+          <div className="font-kode font-bold text-orange-500">Workflow </div>
           <Input placeholder="workflow name" className="border-transparent"/>
         </div>
         <div className="flex items-center  gap-5">
         <div className="font-inter flex gap-2 items-center ">Enabled  : <SlideToggle setEnable={setEnable} />
           <span className="ml-2 text-sm opacity-70">{enable ? 'On' : 'Off'}</span>
         </div>
-          <Button className="font-kode font-bold">Save</Button>
+          <Button className="font-kode font-bold bg-orange-500">Save</Button>
         </div>
       </div>
 
@@ -57,7 +57,7 @@ const WorkflowPage = () => {
           fitView
           colorMode={theme}
         >
-          <Panel position="top-center" className="bg-white font-kode px-2 py-1 border border-black  rounded-md dark:text-black">Workflow Editor</Panel>
+          <Panel position="top-center" className="bg-orange-500 font-kode px-2 py-1 border border-black  rounded-md dark:text-black">Workflow Editor</Panel>
               <Background />
               <Controls/>
         </ReactFlow>

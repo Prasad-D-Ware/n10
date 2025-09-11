@@ -22,7 +22,7 @@ const SlideToggle = ({ setEnable }: SlideToggleProps) => {
         width: 40,
         height: 20,
         borderRadius: 30,
-        background: on ? "#4caf50" : "#ccc",
+        background: on ? "#f97316" : "#ccc",
         display: "flex",
         alignItems: "center",
         cursor: "pointer",

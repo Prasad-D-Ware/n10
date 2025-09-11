@@ -20,9 +20,9 @@ const WpCredentials =({onDataChange}: {onDataChange: (state : {} )=>void }) => {
           </a>{" "}
           and Provide the Access Token and Business Account Id for it!
       </div>{" "}
-    <label className="text-black font-bold font-kode">Access Token<span className="text-red-600">*</span></label>
+    <label className="text-black font-bold font-kode dark:text-orange-500">Access Token<span className="text-red-600">*</span></label>
     <Input placeholder="Access Token" required onChange={(e)=>setAccessToken(e.target.value)}/>
-    <label className="text-black font-bold font-kode">Business Account ID<span className="text-red-600">*</span></label>
+    <label className="text-black font-bold font-kode dark:text-orange-500">Business Account ID<span className="text-red-600">*</span></label>
     <Input placeholder="Business Account ID" required onChange={(e)=>setBusinessAccountId(e.target.value)}/>
   </div>
   )

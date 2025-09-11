@@ -14,8 +14,11 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { useSidebar } from "@/components/ui/sidebar";
 import { Button } from "./ui/button";
 import { ModeToggle } from "./mode-toggle";
+import { NavLink } from "react-router-dom";
+import axios from "axios";
 
 // Menu items.
 const items = [
@@ -32,6 +35,23 @@ const items = [
 ];
 
 export function AppSidebar() {
+  const { state } = useSidebar();
+
+  const handleLogut = async () =>{
+    try {
+      const response = await axios.post('http://localhost:3000/api/v1/auth/logout');
+  
+      if (response.data.success) {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      } else {
+        console.error('Logout failed');
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  }
+
   return (
     <Sidebar variant="floating" collapsible="icon">
       <SidebarHeader>
@@ -50,23 +70,29 @@ export function AppSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon />
-                      <span className="font-kode">{item.title}</span>
-                    </a>
+                    <NavLink to={item.url}>
+                      {({ isActive }) => (
+                        <>
+                          <item.icon className={isActive ? "text-orange-500" : undefined} />
+                          <span className={`font-kode ${isActive ? "text-orange-500" : ""}`}>{item.title}</span>
+                        </>
+                      )}
+                    </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        <SidebarFooter className="absolute bottom-3 ">
-          <div className="flex justify-between gap-22 w-full">
-          <ModeToggle />
-          <Button variant={"outline"}>
-            <LogOut />
-            Logout
-          </Button>
+        <SidebarFooter className="absolute bottom-3">
+          <div className="flex justify-end gap-22 items-center">
+            <ModeToggle />
+            {state === "expanded" && (
+              <Button variant={"outline"} onClick={handleLogut} className="bg-orange-500 dark:bg-orange-500 text-white">
+                <LogOut />
+                Logout
+              </Button>
+            )}
           </div>
         </SidebarFooter>
       </SidebarContent>

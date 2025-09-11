@@ -16,7 +16,7 @@ const TgCredentials = ({onDataChange}: {onDataChange: (state : {} )=>void }) => 
             </a>{" "}
             and Provide the Bot Access Token by Creating a bot at Botfather!
         </div>{" "}
-      <label className="text-black font-bold font-kode">Access Token<span className="text-red-600">*</span></label>
+      <label className="text-black font-bold dark:text-orange-500 font-kode">Access Token<span className="text-red-600">*</span></label>
       <Input placeholder="Access Token" required  onChange={(e)=>setApiKey(e.target.value)}/>
     </div>
   )

@@ -138,6 +138,14 @@ export function CredentialsCards({ credentials, onEdit, onDelete, onSave }: Cred
     )
   }
 
+  if(credentials.length === 0){
+    return (
+      <div className="h-[600px] w-full flex justify-center items-center">
+        <div className="font-kode font-bold text-xl">No Credentials Yet! Create Credentials Now!</div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-2">
       {credentials.map((credential) => (
@@ -185,7 +193,7 @@ export function CredentialsCards({ credentials, onEdit, onDelete, onSave }: Cred
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value={credential.id} className="border-none">
                 <AccordionTrigger className="hover:no-underline py-1">
-                  <span className="text-sm font-kode font-extrabold">View Credentials</span>
+                  <span className="text-sm font-kode font-extrabold text-orange-500">View Credentials</span>
                 </AccordionTrigger>
                 <AccordionContent className="pt-0.5">{renderCredentialData(credential)}</AccordionContent>
               </AccordionItem>
