@@ -24,6 +24,7 @@ import OpenAICredentials from "@/components/openai-credentials";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
 import { toast } from "sonner";
+import { CredentialsCards } from "@/components/credential-card";
 
 const demoApplications = [
   { key: "telegram", name: "Telegram" },
@@ -32,38 +33,56 @@ const demoApplications = [
   { key: "resend", name: "Resend (Mail)" },
 ];
 
+export interface Credentials {
+  id: string,
+  user_id: string,
+  name: string,
+  application: string,
+  data: {
+      apikey?: string,
+      accessToken?: string
+      businessAccountId? : string
+  },
+  created_at: string,
+  updated_at: string
+}
+
 const DashBoardPage = () => {
   const navigate = useNavigate();
   const [applications] = useState(demoApplications);
   const [selectedApp, setSelectedApp] = useState("");
   const [credName,setCredName] = useState("");
   const [credData,setCredData] = useState({});
+  const [credentials,setCredentials] = useState<Credentials[]>([])
 
   useEffect(()=>{
     fetchAllCredentials();
   },[])
 
   const fetchAllCredentials = async() => {
-    const response = await axios.get("http://localhost:3000/api/v1/credentials/create");
+    const response = await axios.get("http://localhost:3000/api/v1/credentials");
 
     const data = response.data;
 
     if(!data.success){
-      toast.error(data.message);
+      // toast.error(data.message);
       console.log(data.error);
       return;
     }
-
-    toast.success(data.message);
-    // TODO : set exisiting credentials that can show under credentials tab
+    // toast.success(data.message);
+    setCredentials((data.credentials as Credentials[]).slice().sort((a,b)=> new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()));
   }
 
+
   const handleCreateCredentials = async() => {
-      const response = await axios.post("http://localhost:3000/api/v1/credentials/create",{
+      const payload = {
         name : credName,
         application : selectedApp,
         data : credData
-      })
+      };
+      // console.log(payload);
+
+      const response = await axios.post("http://localhost:3000/api/v1/credentials/create", payload);
 
       const data = response.data;
 
@@ -74,6 +93,44 @@ const DashBoardPage = () => {
       }
 
       toast.success(data.message);
+  }
+
+  const handleUpdateCredential = async(updated: Credentials) => {
+    try {
+      const response = await axios.put(`http://localhost:3000/api/v1/credentials/${updated.id}`, {
+        name: updated.name,
+        data: updated.data
+      });
+      const data = response.data;
+      if(!data.success){
+        toast.error(data.message || "Update failed");
+        return;
+      }
+      const saved: Credentials = data.credential;
+      setCredentials(prev => prev
+        .map(c => c.id === saved.id ? saved : c)
+        .slice()
+        .sort((a,b)=> new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+      );
+      toast.success("Credential Updated");
+    } catch (error:any) {
+      toast.error(error?.response?.data?.message || "Update failed");
+    }
+  }
+
+  const handleDeleteCredential = async(id: string) => {
+    try {
+      const response = await axios.delete(`http://localhost:3000/api/v1/credentials/${id}`);
+      const data = response.data;
+      if(!data.success){
+        toast.error(data.message || "Delete failed");
+        return;
+      }
+      setCredentials(prev => prev.filter(c => c.id !== id));
+      toast.success(data.message);
+    } catch (error:any) {
+      toast.error(error?.response?.data?.message || "Delete failed");
+    }
   }
   return (
     <div className="m-16 mx-auto max-w-7xl w-full">
@@ -141,7 +198,11 @@ const DashBoardPage = () => {
             TODO : get all workflows made by this user
           </TabsContent>
           <TabsContent value="credentials">
-            TODO : get all credentials given by this user
+            <CredentialsCards 
+              credentials={credentials}
+              onSave={handleUpdateCredential}
+              onDelete={handleDeleteCredential}
+            />
           </TabsContent>
         </Tabs>
       </div>

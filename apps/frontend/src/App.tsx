@@ -9,6 +9,9 @@ import { AppSidebar } from "./components/app-sidebar";
 import WorkflowPage from "./pages/workflow-page";
 import { ThemeProvider } from "./components/theme-provider";
 import { Toaster } from "sonner";
+import axios from "axios";
+
+axios.defaults.withCredentials = true;
 
 function App() {
   return (
