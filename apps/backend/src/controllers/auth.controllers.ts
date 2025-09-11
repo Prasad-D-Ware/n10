@@ -107,6 +107,8 @@ const login = async (req : Request ,res : Response ) => {
 
         const token = jwt.sign(payload , process.env.JWT_SECRET!);
 
+        res.cookie("auth_token",token);
+
         res.status(200).json({
             success : true,
             message : "User Logged In Successfully!",

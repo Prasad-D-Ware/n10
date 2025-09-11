@@ -2,8 +2,10 @@ import express from "express";
 import authRouter from "./routers/auth.routers";
 import cors from "cors";
 import credentialRouter from "./routers/credential.router";
+import cookieParser from "cookie-parser";
 
 const app = express();
+app.use(cookieParser());
 
 app.use(express.json());
 app.use(cors({
