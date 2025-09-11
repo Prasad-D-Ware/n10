@@ -107,7 +107,12 @@ const login = async (req : Request ,res : Response ) => {
 
         const token = jwt.sign(payload , process.env.JWT_SECRET!);
 
-        res.cookie("auth_token",token);
+        res.cookie("auth_token",token,{
+            expires : new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
+            httpOnly : true,
+            secure : process.env.NODE_ENV === "production",
+            sameSite : "strict"
+        });
 
         res.status(200).json({
             success : true,
@@ -126,8 +131,16 @@ const login = async (req : Request ,res : Response ) => {
     }
 }
 
+const logout = async (req : Request ,res : Response ) => {
+    res.clearCookie("auth_token");
+    res.status(200).json({
+        success : true,
+        message : "User Logged Out Successfully!"
+    })
+}
 
 export {
     signup,
-    login
+    login,
+    logout
 }
