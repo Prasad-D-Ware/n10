@@ -25,6 +25,7 @@ import {
 import axios from "axios";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { TriggerCard, type Trigger } from "@/components/trigger-card";
 
 const initialNodes = [
   {
@@ -49,6 +50,8 @@ const WorkflowPage = () => {
   const { theme } = useTheme();
   const navigate = useNavigate();
   const { id } = useParams();
+
+  const [availableTriggers,setAvailableTriggers] = useState([]);
 
   const onNodesChange = useCallback(
     (changes: any) =>
@@ -96,6 +99,17 @@ const WorkflowPage = () => {
 
   const handleAddTrigger = async () => {
     setTriggerSheet(true);
+    const response = await axios.get("http://localhost:3000/api/v1/availableTrigger");
+
+    const data = response.data;
+
+    if(!data.success){
+      console.log("Error",data.error);
+      return;
+    }
+
+    console.log(data.triggers);
+    setAvailableTriggers(data.triggers);
   };
 
   const handleSaveWorkflow = async () => {
@@ -194,6 +208,7 @@ const WorkflowPage = () => {
           fitView
           colorMode={theme}
           className="flex items-center justify-center"
+          // maxZoom={1}
         >
           <Panel
             position="top-center"
@@ -212,11 +227,16 @@ const WorkflowPage = () => {
               </SheetTrigger>
               <SheetContent>
                 <SheetHeader className="mt-10">
-                  <SheetTitle className="font-kode">Create A Trigger for Your Workflow</SheetTitle>
+                  <SheetTitle className="font-kode">What triggers this workflow?</SheetTitle>
                   <SheetDescription className="font-inter">
-                    TODO: get all triggers available for using
+                  A trigger is a step that starts your workflow
                   </SheetDescription>
-                </SheetHeader>
+                    </SheetHeader>
+                  <div className="flex flex-col gap-5 mx-5">
+                  {availableTriggers.map((trigger : Trigger) => 
+                    <TriggerCard key={trigger.id} trigger={trigger} />
+                  )}
+                   </div>
               </SheetContent>
             </Sheet>
 
