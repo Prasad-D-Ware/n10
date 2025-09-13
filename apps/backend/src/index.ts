@@ -3,6 +3,7 @@ import authRouter from "./routers/auth.routers";
 import cors from "cors";
 import credentialRouter from "./routers/credential.router";
 import cookieParser from "cookie-parser";
+import workflowRouter from "./routers/workflows.routers";
 
 const app = express();
 app.use(cookieParser());
@@ -15,6 +16,7 @@ app.use(cors({
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/credentials", credentialRouter);
+app.use("/api/v1/workflows", workflowRouter);
 
 app.listen(3000,()=> {
     console.log("Server running on 3000")
