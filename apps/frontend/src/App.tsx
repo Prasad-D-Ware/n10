@@ -24,6 +24,7 @@ function App() {
           <Route element={<Signup />} path="/signup" />
           <Route element={<><AppSidebar/><DashBoardPage /></>} path="/dashboard" />
           <Route element={<><AppSidebar/><WorkflowPage /></>} path="/workflows" />
+          <Route element={<><AppSidebar/><WorkflowPage /></>} path="/workflows/:id" />
         </Routes>
       </SidebarProvider>
       </ThemeProvider>

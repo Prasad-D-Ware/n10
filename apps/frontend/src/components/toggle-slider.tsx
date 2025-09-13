@@ -1,11 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type SlideToggleProps = {
+  enabled?: boolean;
   setEnable?: (value: boolean) => void;
 };
 
-const SlideToggle = ({ setEnable }: SlideToggleProps) => {
-  const [on, setOn] = useState(false);
+const SlideToggle = ({ enabled = false, setEnable }: SlideToggleProps) => {
+  const [on, setOn] = useState(enabled);
+
+  // Sync internal state with external enabled prop
+  useEffect(() => {
+    setOn(enabled);
+  }, [enabled]);
 
   const handleClick = () => {
     setOn((previous) => {

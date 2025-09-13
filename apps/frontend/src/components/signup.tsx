@@ -17,10 +17,12 @@ import { toast } from "sonner"
 export function Signup() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsLoading(true)
     
     try {
       const response = await axios.post("http://localhost:3000/api/v1/auth/signup", {
@@ -43,6 +45,8 @@ export function Signup() {
     } catch (error) {
       console.error("Signup failed:", error)
       // Handle signup error here
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -91,8 +95,8 @@ export function Signup() {
         </form>
       </CardContent>
       <CardFooter className="flex-col gap-2">
-        <Button type="submit" className="w-full" onClick={handleSignup}>
-          SignUp
+        <Button type="submit" className="w-full" onClick={handleSignup} disabled={isLoading}>
+          {isLoading ? "Creating account..." : "SignUp"}
         </Button>
         <div className="text-sm text-gray-500 mt-2">Already have a account? <a href="/login" className="hover:underline text-black">Login</a></div>
       </CardFooter>

@@ -26,6 +26,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { CredentialsCards } from "@/components/credential-card";
 import { Loader2 } from "lucide-react";
+import { WorkflowCards } from "@/components/workflows-card";
 
 const demoApplications = [
   { key: "telegram", name: "Telegram" },
@@ -55,12 +56,47 @@ const DashBoardPage = () => {
   const [credName, setCredName] = useState("");
   const [credData, setCredData] = useState({});
   const [credentials, setCredentials] = useState<Credentials[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [workflows,setWorkflows] = useState([]);
+  const [loadingWorkflow,setLoadingWorkflow] = useState(false);
 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchAllCredentials();
+    fetchAllWorkflows();
   }, []);
+
+  const fetchAllWorkflows = async () => {
+    setLoadingWorkflow(true);
+    try {
+      const response = await axios.get(
+        "http://localhost:3000/api/v1/workflows"
+      );
+
+      const data = response.data;
+
+      if (!data.success) {
+        console.log(data.error);
+        return;
+      }
+
+      console.log(data.workflows);
+      setWorkflows(data.workflows);
+
+    } catch (error) {
+      console.log("Error fetching workflows:", error);
+      
+    } finally {
+      setLoadingWorkflow(false);
+    }
+  }
+
+  const handleWorkflowDeleted = (workflowId: string) => {
+    setWorkflows(workflows.filter((workflow: any) => workflow.id !== workflowId));
+    toast.success("Workflow deleted successfully!");
+  };
 
   const fetchAllCredentials = async () => {
     const response = await axios.get(
@@ -88,27 +124,42 @@ const DashBoardPage = () => {
   };
 
   const handleCreateCredentials = async () => {
-    const payload = {
-      name: credName,
-      application: selectedApp,
-      data: credData,
-    };
-    // console.log(payload);
+    setIsCreating(true);
+    try {
+      const payload = {
+        name: credName,
+        application: selectedApp,
+        data: credData,
+      };
+      // console.log(payload);
 
-    const response = await axios.post(
-      "http://localhost:3000/api/v1/credentials/create",
-      payload
-    );
+      const response = await axios.post(
+        "http://localhost:3000/api/v1/credentials/create",
+        payload
+      );
 
-    const data = response.data;
+      const data = response.data;
 
-    if (!data.success) {
-      toast.error(data.message);
-      console.log(data.error);
-      return;
+      if (!data.success) {
+        toast.error(data.message);
+        console.log(data.error);
+        return;
+      }
+
+      toast.success(data.message);
+      
+      setCredName("");
+      setCredData({});
+      setSelectedApp("");
+      setIsDialogOpen(false);
+      
+      await fetchAllCredentials();
+    } catch (error) {
+      console.error("Error creating credential:", error);
+      toast.error("Failed to create credential");
+    } finally {
+      setIsCreating(false);
     }
-
-    toast.success(data.message);
   };
 
   const handleUpdateCredential = async (updated: Credentials) => {
@@ -176,7 +227,7 @@ const DashBoardPage = () => {
           >
             Create Workflow
           </Button>
-          <Dialog>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-orange-500 ">Create Credentials</Button>
             </DialogTrigger>
@@ -226,8 +277,16 @@ const DashBoardPage = () => {
                   <Button
                     className="font-kode w-full bg-orange-500"
                     onClick={handleCreateCredentials}
+                    disabled={isCreating || !selectedApp || !credName}
                   >
-                    Create Credential
+                    {isCreating ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating...
+                      </>
+                    ) : (
+                      "Create Credential"
+                    )}
                   </Button>
                 </div>
               </div>
@@ -241,9 +300,15 @@ const DashBoardPage = () => {
           <TabsList>
             <TabsTrigger value="workflows">Workflows</TabsTrigger>
             <TabsTrigger value="credentials">Credentials</TabsTrigger>
+            {/* <TabsTrigger value="executions">Executions</TabsTrigger> */}
           </TabsList>
           <TabsContent value="workflows">
-            TODO : get all workflows made by this user
+          {loadingWorkflow ? (
+              <div className="h-[600px] w-full justify-center flex items-center">
+                <Loader2 className="animate-spin text-orange-500" />
+              </div>
+            ) :
+           <WorkflowCards workflows={workflows} onWorkflowDeleted={handleWorkflowDeleted}/>}
           </TabsContent>
           <TabsContent value="credentials">
             {loading ? (
@@ -258,6 +323,9 @@ const DashBoardPage = () => {
               />
             )}
           </TabsContent>
+          {/* <TabsContent value="executions">
+            TODO : /// executions
+          </TabsContent> */}
         </Tabs>
       </div>
     </div>

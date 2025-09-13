@@ -148,6 +148,8 @@
 @theme {
   --font-kode: "Kode Mono", monospace;
   --font-inter : "Inter", sans-serif;
+  --color-orange-500: #FF5722;
+  --background-orange-500: #FF5722;
 }
 
 
