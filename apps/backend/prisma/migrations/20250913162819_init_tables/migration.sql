@@ -1,3 +1,6 @@
+-- CreateEnum
+CREATE TYPE "public"."Applications" AS ENUM ('whatsapp', 'openai', 'telegram', 'resend');
+
 -- CreateTable
 CREATE TABLE "public"."User" (
     "id" TEXT NOT NULL,
@@ -24,8 +27,18 @@ CREATE TABLE "public"."Credential" (
     "id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
     "name" TEXT NOT NULL DEFAULT 'Untitled Credential',
-    "application" TEXT NOT NULL,
+    "application" "public"."Applications" NOT NULL,
     "data" JSONB NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CreateTable
+CREATE TABLE "public"."AvailableTriggers" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -42,8 +55,11 @@ CREATE UNIQUE INDEX "Workflow_id_key" ON "public"."Workflow"("id");
 -- CreateIndex
 CREATE UNIQUE INDEX "Credential_id_key" ON "public"."Credential"("id");
 
--- AddForeignKey
-ALTER TABLE "public"."Workflow" ADD CONSTRAINT "Workflow_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+-- CreateIndex
+CREATE UNIQUE INDEX "AvailableTriggers_id_key" ON "public"."AvailableTriggers"("id");
 
 -- AddForeignKey
-ALTER TABLE "public"."Credential" ADD CONSTRAINT "Credential_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."Workflow" ADD CONSTRAINT "Workflow_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."Credential" ADD CONSTRAINT "Credential_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

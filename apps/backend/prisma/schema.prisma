@@ -37,25 +37,34 @@ model Workflow {
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
 
-  user User @relation(fields: [user_id], references: [id])
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model Credential {
-  id          String @unique @default(cuid())
+  id          String       @unique @default(cuid())
   user_id     String
-  name        String @default("Untitled Credential")
+  name        String       @default("Untitled Credential")
   application Applications
   data        Json
 
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
 
-  user User @relation(fields: [user_id], references: [id])
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
-enum Applications{
+enum Applications {
   whatsapp
   openai
   telegram
   resend
+}
+
+model AvailableTriggers {
+  id          String   @unique @default(cuid())
+  name        String
+  type        String
+  description String
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now())
 }
