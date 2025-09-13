@@ -13,6 +13,7 @@ import axios from "axios"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
+import logo from "../assets/n10-logo.png"
 
 export function Login() {
   const [email, setEmail] = useState("")
@@ -55,6 +56,7 @@ export function Login() {
     <div className="h-screen flex items-center justify-center w-screen">
     <Card className="w-full max-w-sm mx-auto">
       <CardHeader>
+        <img src={logo} alt="Logo" className="h-30 self-center mx-auto"/>
         <CardTitle>Login to your account</CardTitle>
         <CardDescription>
           Enter your email below to login to your account
@@ -99,7 +101,7 @@ export function Login() {
         <Button type="submit" className="w-full" onClick={handleLogin} disabled={isLoading}>
           {isLoading ? "Logging in..." : "Login"}
         </Button>
-        <div className="text-sm text-gray-500 mt-2">Dont have a account? <a href="/signup" className="hover:underline text-black">SignUp</a></div>
+        <div className="text-sm text-gray-500 mt-2">Dont have a account? <a href="/signup" className="hover:underline text-black dark:text-white">SignUp</a></div>
       </CardFooter>
     </Card>
     </div>
