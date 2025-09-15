@@ -13,7 +13,6 @@ import {
   MiniMap,
   type Node,
   type Edge,
-  useReactFlow,
   type ReactFlowInstance,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -39,36 +38,36 @@ const nodeTypes = {
   action: ActionNode,
 }
 
-const initialNodes : Node[] = [
-  // {
-  //   id: "n1",
-  //   type : "trigger",
-  //   position: { x: 0, y: 0 },
-  //   data: { label: "MANUAL", type: "manual-trigger",input:{ message  : "hello happy bday" } },
-  // },
-  // { id: "n2", type: "action", position: { x: 100, y: 0 }, data: { label: "Node 2" ,type: "telegram"} },
-  // { id: "n3", type: "action", position: { x: 200, y: 0 }, data: { label: "Node 3" ,type: "resend"} },
-  // { id: "n4", type: "action", position: { x: 300, y: 0 }, data: { label: "Node 4" ,type: "openai"} },
-  // { id: "n5", type: "action", position: { x: 400, y: 0 }, data: { label: "Node 5" ,type: "whatsapp"} },
-  // { id: "n6", type: "action", position: { x: 500, y: 0 }, data: { label: "Node 6" ,type: "agent"} },
-  // { id: "n7", type: "action", position: { x: 450, y: 100 }, data: { label: "Node 6" ,type: "openai"} },
-  // { id: "n8", type: "action", position: { x: 600, y: 100 }, data: { label: "Node 6" ,type: "resend"} },
-  // { id: "n9", type: "action", position: { x: 650, y: 0 }, data: { label: "Node 6" ,type: "telegram"} },
-];
-const initialEdges : Edge[] =  [
-  // { id: "n1-n2", source: "n1", target: "n2" },
-  // { id: "n2-n3", source: "n2", target: "n3" },
-  // { id: "n3-n4", source: "n3", target: "n4" },
-  // { id: "n4-n5", source: "n4", target: "n5" },
-  // { id: "n5-n6", source: "n5", target: "n6" },
-  // { id: "n6-n7", source: "n6", target: "n7" ,sourceHandle: "model"},
-  // { id: "n7-n8", source: "n6", target: "n8" ,sourceHandle: "tools"},
-  // { id: "n6-n9", source: "n6", target: "n9" },
-];
+// const initialNodes : Node[] = [
+//   // {
+//   //   id: "n1",
+//   //   type : "trigger",
+//   //   position: { x: 0, y: 0 },
+//   //   data: { label: "MANUAL", type: "manual-trigger",input:{ message  : "hello happy bday" } },
+//   // },
+//   // { id: "n2", type: "action", position: { x: 100, y: 0 }, data: { label: "Node 2" ,type: "telegram"} },
+//   // { id: "n3", type: "action", position: { x: 200, y: 0 }, data: { label: "Node 3" ,type: "resend"} },
+//   // { id: "n4", type: "action", position: { x: 300, y: 0 }, data: { label: "Node 4" ,type: "openai"} },
+//   // { id: "n5", type: "action", position: { x: 400, y: 0 }, data: { label: "Node 5" ,type: "whatsapp"} },
+//   // { id: "n6", type: "action", position: { x: 500, y: 0 }, data: { label: "Node 6" ,type: "agent"} },
+//   // { id: "n7", type: "action", position: { x: 450, y: 100 }, data: { label: "Node 6" ,type: "openai"} },
+//   // { id: "n8", type: "action", position: { x: 600, y: 100 }, data: { label: "Node 6" ,type: "resend"} },
+//   // { id: "n9", type: "action", position: { x: 650, y: 0 }, data: { label: "Node 6" ,type: "telegram"} },
+// ];
+// const initialEdges : Edge[] =  [
+//   // { id: "n1-n2", source: "n1", target: "n2" },
+//   // { id: "n2-n3", source: "n2", target: "n3" },
+//   // { id: "n3-n4", source: "n3", target: "n4" },
+//   // { id: "n4-n5", source: "n4", target: "n5" },
+//   // { id: "n5-n6", source: "n5", target: "n6" },
+//   // { id: "n6-n7", source: "n6", target: "n7" ,sourceHandle: "model"},
+//   // { id: "n7-n8", source: "n6", target: "n8" ,sourceHandle: "tools"},
+//   // { id: "n6-n9", source: "n6", target: "n9" },
+// ];
 
 const WorkflowPage = () => {
-  const [nodes, setNodes] = useState(initialNodes);
-  const [edges, setEdges] = useState(initialEdges);
+  const [nodes, setNodes] = useState<Node[]>([]);
+  const [edges, setEdges] = useState<Edge[]>([]);
   const [enable, setEnable] = useState(false);
   const [workflowName, setWorkflowName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -76,6 +75,16 @@ const WorkflowPage = () => {
   const { theme } = useTheme();
   const navigate = useNavigate();
   const { id } = useParams();
+  const [rfInstance, setRfInstance] = useState<ReactFlowInstance<Node, Edge> | null>(null);
+  const [pendingViewport, setPendingViewport] = useState<{ x: number; y: number; zoom: number } | null>(null);
+
+
+  const saveFLow = useCallback(() => {
+    if (rfInstance) {
+      const flow = rfInstance.toObject();
+      return flow;
+    }
+  }, [rfInstance]);
 
   const [availableTriggers,setAvailableTriggers] = useState([]);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
@@ -109,8 +118,17 @@ const WorkflowPage = () => {
           const workflow = response.data.workflow;
           setWorkflowName(workflow.name || "");
           setEnable(workflow.enabled || false);
-          setNodes(workflow.nodes || []);
-          setEdges(workflow.edges || []);
+
+          const flow = workflow.flow;
+
+          if (flow) {
+            const { x = 0, y = 0, zoom = 1 } = flow.viewport || {};
+            setNodes(flow.nodes || []);
+            setEdges(flow.edges || []);
+            setPendingViewport({ x, y, zoom });
+          }
+          // setNodes(workflow.nodes || []);
+          // setEdges(workflow.edges || []);
         } else {
           toast.error(response.data.message || "Failed to fetch workflow");
         }
@@ -161,13 +179,16 @@ const WorkflowPage = () => {
 
   const handleSaveWorkflow = async () => {
     setSaving(true);
+    const flow = saveFLow();
+    console.log(flow);
     try {
       if(id){
         const response = await axios.put(`http://localhost:3000/api/v1/workflows/${id}`,{
           name : workflowName,
           enabled : enable,
           nodes,
-          edges
+          edges,
+          flow
         })
 
         if(!response.data.success){
@@ -182,7 +203,8 @@ const WorkflowPage = () => {
         name : workflowName,
         enabled : enable,
         nodes,
-        edges
+        edges,
+        flow
       })
 
       if(!response.data.success){
@@ -243,7 +265,7 @@ const WorkflowPage = () => {
             </span>
           </div>
           <Button 
-            className="font-kode font-bold bg-orange-500" 
+            className="font-kode font-bold bg-orange-500 hover:bg-orange-700 hover:text-white hover:cursor-pointer" 
             onClick={handleSaveWorkflow}
             disabled={saving}
           >
@@ -269,6 +291,12 @@ const WorkflowPage = () => {
           fitView
           colorMode={theme}
           className="flex items-center justify-center"
+          onInit={(reactFlowInstance) => {
+            setRfInstance(reactFlowInstance);
+            if (pendingViewport) {
+              reactFlowInstance.setViewport(pendingViewport);
+            }
+          }}
           // maxZoom={1}
         >
           <MiniMap/>
