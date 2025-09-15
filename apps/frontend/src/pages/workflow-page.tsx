@@ -10,6 +10,11 @@ import {
   Background,
   Controls,
   Panel,
+  MiniMap,
+  type Node,
+  type Edge,
+  useReactFlow,
+  type ReactFlowInstance,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useTheme } from "@/components/theme-provider";
@@ -20,30 +25,51 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
 import axios from "axios";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { TriggerCard, type Trigger } from "@/components/trigger-card";
+import { ActionCard } from "@/components/action-card";
+import { ActionNode, TriggerNode } from "@/components/custom-nodes";
 
-const initialNodes = [
-  {
-    id: "n1",
-    position: { x: 0, y: 0 },
-    data: { label: "MANUAL", type: "trigger",input:{ message  : "hello happy bday" } },
-  },
-  { id: "n2", position: { x: 0, y: 100 }, data: { label: "Node 2" } },
-  { id: "n3", position: { x: 0, y: 200 }, data: { label: "Node 3" } },
-  { id: "n4", position: { x: 0, y: 300 }, data: { label: "Node 4" } },
+
+const nodeTypes = {
+  trigger: TriggerNode,
+  action: ActionNode,
+}
+
+const initialNodes : Node[] = [
+  // {
+  //   id: "n1",
+  //   type : "trigger",
+  //   position: { x: 0, y: 0 },
+  //   data: { label: "MANUAL", type: "manual-trigger",input:{ message  : "hello happy bday" } },
+  // },
+  // { id: "n2", type: "action", position: { x: 100, y: 0 }, data: { label: "Node 2" ,type: "telegram"} },
+  // { id: "n3", type: "action", position: { x: 200, y: 0 }, data: { label: "Node 3" ,type: "resend"} },
+  // { id: "n4", type: "action", position: { x: 300, y: 0 }, data: { label: "Node 4" ,type: "openai"} },
+  // { id: "n5", type: "action", position: { x: 400, y: 0 }, data: { label: "Node 5" ,type: "whatsapp"} },
+  // { id: "n6", type: "action", position: { x: 500, y: 0 }, data: { label: "Node 6" ,type: "agent"} },
+  // { id: "n7", type: "action", position: { x: 450, y: 100 }, data: { label: "Node 6" ,type: "openai"} },
+  // { id: "n8", type: "action", position: { x: 600, y: 100 }, data: { label: "Node 6" ,type: "resend"} },
+  // { id: "n9", type: "action", position: { x: 650, y: 0 }, data: { label: "Node 6" ,type: "telegram"} },
 ];
-const initialEdges = [{ id: "n1-n2", source: "n1", target: "n2" },{ id: "n2-n3", source: "n2", target: "n3" },{ id: "n3-n4", source: "n3", target: "n4" }];
+const initialEdges : Edge[] =  [
+  // { id: "n1-n2", source: "n1", target: "n2" },
+  // { id: "n2-n3", source: "n2", target: "n3" },
+  // { id: "n3-n4", source: "n3", target: "n4" },
+  // { id: "n4-n5", source: "n4", target: "n5" },
+  // { id: "n5-n6", source: "n5", target: "n6" },
+  // { id: "n6-n7", source: "n6", target: "n7" ,sourceHandle: "model"},
+  // { id: "n7-n8", source: "n6", target: "n8" ,sourceHandle: "tools"},
+  // { id: "n6-n9", source: "n6", target: "n9" },
+];
 
 const WorkflowPage = () => {
   const [nodes, setNodes] = useState(initialNodes);
   const [edges, setEdges] = useState(initialEdges);
   const [enable, setEnable] = useState(false);
-  const [showTriggerSheet, setTriggerSheet] = useState(false);
   const [workflowName, setWorkflowName] = useState("");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -52,6 +78,8 @@ const WorkflowPage = () => {
   const { id } = useParams();
 
   const [availableTriggers,setAvailableTriggers] = useState([]);
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [pickerMode, setPickerMode] = useState<"trigger" | "action">("trigger");
 
   const onNodesChange = useCallback(
     (changes: any) =>
@@ -81,8 +109,8 @@ const WorkflowPage = () => {
           const workflow = response.data.workflow;
           setWorkflowName(workflow.name || "");
           setEnable(workflow.enabled || false);
-          setNodes(workflow.nodes || initialNodes);
-          setEdges(workflow.edges || initialEdges);
+          setNodes(workflow.nodes || []);
+          setEdges(workflow.edges || []);
         } else {
           toast.error(response.data.message || "Failed to fetch workflow");
         }
@@ -98,7 +126,6 @@ const WorkflowPage = () => {
   }, [id]);
 
   const handleAddTrigger = async () => {
-    setTriggerSheet(true);
     const response = await axios.get("http://localhost:3000/api/v1/availableTrigger");
 
     const data = response.data;
@@ -110,6 +137,26 @@ const WorkflowPage = () => {
 
     console.log(data.triggers);
     setAvailableTriggers(data.triggers);
+  };
+
+  const openPicker = async (mode: "trigger" | "action") => {
+    setPickerMode(mode);
+    if (mode === "trigger") {
+      await handleAddTrigger();
+    }
+    setIsPickerOpen(true);
+  };
+
+  const handleSelectAction = (action: { id: string; name: string; type: string }) => {
+    const newId = `a-${Date.now()}`;
+    const actionNode = {
+      id: newId,
+      type: "action" as const,
+      position: { x: 150, y: nodes.length * 40 },
+      data: { label: action.name, type: action.type },
+    };
+    setNodes((prev) => [ ...prev,actionNode]);
+    setIsPickerOpen(false);
   };
 
   const handleSaveWorkflow = async () => {
@@ -156,6 +203,19 @@ const WorkflowPage = () => {
       setSaving(false);
     }
   }
+
+  const handleSelectTrigger = (trigger: Trigger) => {
+    // console.log(trigger)
+    const newId = `t-${Date.now()}`;
+    const triggerNode = {
+      id: newId,
+      type: "trigger" as const,
+      position: { x: 0, y: 0 },
+      data: { label: trigger.name, type: trigger.type },
+    };
+    setNodes((prev) => [...prev,triggerNode]);
+    setIsPickerOpen(false);
+  };
 
   if (loading) {
     return (
@@ -204,47 +264,89 @@ const WorkflowPage = () => {
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
+          nodeTypes={nodeTypes}
           onConnect={onConnect}
           fitView
           colorMode={theme}
           className="flex items-center justify-center"
           // maxZoom={1}
         >
+          <MiniMap/>
           <Panel
             position="top-center"
             className="bg-orange-500 font-kode px-2 py-1 border border-black  rounded-md dark:text-black"
           >
             Workflow Editor
           </Panel>
+          <Panel position="top-left" className="bg-transparent shadow-none font-inter"> {nodes.length > 0 && <span className="text-sm opacity-70">Drag and connect nodes to create your workflow</span>}</Panel>
           <Background />
-          <div className="flex items-center justify-center flex-col">
-            <Sheet>
-              <SheetTrigger
-                className="z-10 border border-dashed border-white h-20 w-20 flex items-center justify-center text-3xl rounded-xl"
-                onClick={handleAddTrigger}
+          <Panel position="top-right" className="bg-transparent shadow-none">
+            <Button
+              className="border p-5 rounded-lg h-10 w-10 flex items-center justify-center border-orange-500"
+              variant={"ghost"}
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                openPicker(nodes.length === 0 ? "trigger" : "action");
+              }}
+            >
+              <Plus className="h-4 w-4"/>
+            </Button>
+          </Panel>
+          {nodes.length === 0 && (
+            <div className="flex items-center justify-center flex-col">
+              <button
+                className="z-10 border border-dashed border-black dark:border-white h-20 w-20 flex items-center justify-center text-3xl rounded-xl"
+                onClick={() => openPicker("trigger")}
               >
                 +
-              </SheetTrigger>
-              <SheetContent>
-                <SheetHeader className="mt-10">
-                  <SheetTitle className="font-kode">What triggers this workflow?</SheetTitle>
-                  <SheetDescription className="font-inter">
-                  A trigger is a step that starts your workflow
-                  </SheetDescription>
-                    </SheetHeader>
-                  <div className="flex flex-col gap-5 mx-5">
-                  {availableTriggers.map((trigger : Trigger) => 
-                    <TriggerCard key={trigger.id} trigger={trigger} />
-                  )}
-                   </div>
-              </SheetContent>
-            </Sheet>
-
-            <div className="font-kode mt-2">Add First Step</div>
-          </div>
-          <Controls />
+              </button>
+              <div className="font-kode mt-2">Add First Step</div>
+            </div>
+          )}
+          <Controls orientation="horizontal"/>
         </ReactFlow>
       </div>
+
+      <Sheet open={isPickerOpen} onOpenChange={setIsPickerOpen}>
+        <SheetContent>
+          {pickerMode === "trigger" ? (
+            <>
+              <SheetHeader className="mt-10">
+                <SheetTitle className="font-kode">What triggers this workflow?</SheetTitle>
+                <SheetDescription className="font-inter">
+                  A trigger is a step that starts your workflow
+                </SheetDescription>
+              </SheetHeader>
+              <div className="flex flex-col gap-5 mx-5 mt-4">
+                {availableTriggers.map((trigger: Trigger) => (
+                  <TriggerCard key={trigger.id} trigger={trigger} onSelect={handleSelectTrigger} />
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <SheetHeader className="mt-10">
+                <SheetTitle className="font-kode">What Happens Next?</SheetTitle>
+                <SheetDescription className="font-inter">
+                  Add an action step to your workflow
+                </SheetDescription>
+              </SheetHeader>
+              <div className="flex flex-col gap-3 mx-5 mt-4">
+                {[
+                  { id: "telegram", name: "Telegram", type: "telegram" },
+                  { id: "whatsapp", name: "WhatsApp", type: "whatsapp" },
+                  { id: "openai", name: "OpenAI", type: "openai" },
+                  { id: "resend", name: "Resend", type: "resend" },
+                  { id: "agent", name: "AI-Agent", type: "agent" },
+                ].map((app) => (
+                  <ActionCard key={app.id} action={app} onSelect={handleSelectAction} />
+                ))}
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };

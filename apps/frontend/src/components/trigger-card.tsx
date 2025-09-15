@@ -10,6 +10,7 @@ export interface Trigger {
 
 interface TriggerCardProps {
   trigger: Trigger
+  onSelect?: (trigger: Trigger) => void
 }
 
 const getTriggerIcon = (type: string) => {
@@ -34,9 +35,9 @@ const getTriggerDisplayName = (name: string, type: string) => {
   return name
 }
 
-export function TriggerCard({ trigger }: TriggerCardProps) {
+export function TriggerCard({ trigger, onSelect }: TriggerCardProps) {
   return (
-    <Card className="hover:shadow-md transition-all duration-200 cursor-pointer border-l-4 border-l-orange-500 hover:border-l-orange-400">
+    <Card className="hover:shadow-md transition-all duration-200 cursor-pointer border-l-4 border-l-orange-500 hover:border-l-orange-400" onClick={() => onSelect?.(trigger)}>
       <CardContent className="p-4">
         <div className="flex items-start gap-4">
           <div className="flex-shrink-0 mt-1">{getTriggerIcon(trigger.type)}</div>
