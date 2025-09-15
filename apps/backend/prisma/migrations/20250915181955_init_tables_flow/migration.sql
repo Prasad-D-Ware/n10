@@ -18,6 +18,7 @@ CREATE TABLE "public"."Workflow" (
     "enabled" BOOLEAN NOT NULL DEFAULT false,
     "nodes" JSONB NOT NULL,
     "edges" JSONB NOT NULL,
+    "flow" JSONB NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

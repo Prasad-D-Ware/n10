@@ -4,7 +4,7 @@ import type { CustomRequest } from "../middleware/auth";
 
 const createWorkflow = async(req: CustomRequest, res : Response) => {
     try {
-        const { name , enabled , nodes , edges } = req.body;
+        const { name , enabled , nodes , edges, flow } = req.body;
 
         const user = req.user;
 
@@ -23,6 +23,7 @@ const createWorkflow = async(req: CustomRequest, res : Response) => {
                 enabled,
                 nodes,
                 edges,
+                flow
             }
         })
 
@@ -53,7 +54,7 @@ const createWorkflow = async(req: CustomRequest, res : Response) => {
 const updateWorkflow = async(req: CustomRequest, res : Response) => {
     try {
         const workflowId = req.params.id;
-        const { name, enabled, nodes, edges } = req.body;
+        const { name, enabled, nodes, edges, flow } = req.body;
         const user_id = req.user.id;
 
         const existing = await prisma.workflow.findFirst({
@@ -68,10 +69,11 @@ const updateWorkflow = async(req: CustomRequest, res : Response) => {
         const updated = await prisma.workflow.update({
             where: { id: workflowId },
             data: {
-                name: name ?? undefined,
-                enabled: enabled ?? undefined,
-                nodes: nodes ?? undefined,
+                name: name ,
+                enabled: enabled ,
+                nodes: nodes ,
                 edges: edges ?? undefined,
+                flow: flow ,
                 updated_at: new Date(),
             },
         });
@@ -118,7 +120,8 @@ const getWorkflow = async(req: CustomRequest, res : Response) => {
                 name : true,
                 enabled : true,
                 nodes : true,
-                edges : true
+                edges : true,
+                flow : true
             }
         })
 

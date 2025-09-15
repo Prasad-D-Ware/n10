@@ -33,7 +33,7 @@ model Workflow {
   enabled Boolean @default(false)
   nodes   Json
   edges   Json
-
+  flow    Json
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
 
