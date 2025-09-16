@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -31,6 +32,19 @@ import { Loader2, Plus } from "lucide-react";
 import { TriggerCard, type Trigger } from "@/components/trigger-card";
 import { ActionCard } from "@/components/action-card";
 import { ActionNode, TriggerNode } from "@/components/custom-nodes";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import OpenAICredentials from "@/components/openai-credentials";
+import TgCredentials from "@/components/tg-credentials";
+import ResendCredential from "@/components/resend-credential";
+import WpCredentials from "@/components/wp-credentials";
 
 
 const nodeTypes = {
@@ -77,6 +91,27 @@ const WorkflowPage = () => {
   const { id } = useParams();
   const [rfInstance, setRfInstance] = useState<ReactFlowInstance<Node, Edge> | null>(null);
   const [pendingViewport, setPendingViewport] = useState<{ x: number; y: number; zoom: number } | null>(null);
+  const [isConfigOpen, setIsConfigOpen] = useState(false);
+  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [formData, setFormData] = useState<any>({});
+
+
+  type Credential = {
+    id: string;
+    user_id: string;
+    name: string;
+    application: string;
+    data: Record<string, any>;
+    created_at: string;
+    updated_at: string;
+  };
+  const [credentials, setCredentials] = useState<Credential[]>([]);
+  const [isCredDialogOpen, setIsCredDialogOpen] = useState(false);
+  const [creatingCred, setCreatingCred] = useState(false);
+  const [credSelectedApp, setCredSelectedApp] = useState("");
+  const [credName, setCredName] = useState("");
+  const [credData, setCredData] = useState<Record<string, any>>({});
+  const [pendingCredentialForNodeId, setPendingCredentialForNodeId] = useState<string | null>(null);
 
 
   const saveFLow = useCallback(() => {
@@ -105,6 +140,273 @@ const WorkflowPage = () => {
       setEdges((edgesSnapshot) => addEdge(params, edgesSnapshot)),
     []
   );
+
+  const onNodeClick = useCallback((_: any, node: Node) => {
+    setSelectedNode(node);
+    const existing = (node.data as any)?.config || {};
+    setFormData(existing);
+    setIsConfigOpen(true);
+  }, []);
+
+  const updateForm = (key: string, value: any) => {
+    setFormData((prev: any) => ({ ...prev, [key]: value }));
+  };
+
+  const handleSaveNodeConfig = () => {
+    if (!selectedNode) return;
+    setNodes((prev) =>
+      prev.map((n) =>
+        n.id === selectedNode.id
+          ? {
+              ...n,
+              data: { ...(n.data as any), config: formData },
+            }
+          : n
+      )
+    );
+    setIsConfigOpen(false);
+    setSelectedNode(null);
+  };
+
+  const fetchAllCredentials = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/v1/credentials");
+      const data = response.data;
+      if (!data.success) {
+        return;
+      }
+      setCredentials(
+        (data.credentials as Credential[])
+          .slice()
+          .sort((a: Credential, b: Credential) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+      );
+    } catch (error) {
+      // ignore
+    }
+  };
+
+  useEffect(() => {
+    fetchAllCredentials();
+  }, []);
+
+  const openCreateCredentialDialog = (application: string, forNodeId?: string) => {
+    setCredSelectedApp(application);
+    setCredName("");
+    setCredData({});
+    if (forNodeId) setPendingCredentialForNodeId(forNodeId);
+    setIsCredDialogOpen(true);
+  };
+
+  const handleCreateCredential = async () => {
+    setCreatingCred(true);
+    try {
+      const payload = { name: credName, application: credSelectedApp, data: credData };
+      const response = await axios.post("http://localhost:3000/api/v1/credentials/create", payload);
+      const data = response.data;
+      if (!data.success) {
+        toast.error(data.message || "Failed to create credential");
+        return;
+      }
+      toast.success(data.message || "Credential created");
+      await fetchAllCredentials();
+      if (pendingCredentialForNodeId && selectedNode && selectedNode.id === pendingCredentialForNodeId) {
+        const match = credentials.find((c) => c.application === credSelectedApp);
+        if (match) {
+          setFormData((prev: any) => ({ ...prev, credential: match.id }));
+        }
+      }
+      setIsCredDialogOpen(false);
+      setPendingCredentialForNodeId(null);
+    } catch (error) {
+      toast.error("Failed to create credential");
+    } finally {
+      setCreatingCred(false);
+    }
+  };
+
+  const CredentialSelector = ({ appType, value, onChange }: { appType: string; value: string; onChange: (v: string) => void }) => {
+    const items = credentials.filter((c) => c.application === appType);
+    return (
+      <Select
+        value={value || ""}
+        onValueChange={(val) => {
+          if (val === "__add__") {
+            openCreateCredentialDialog(appType, selectedNode?.id);
+            return;
+          }
+          onChange(val);
+        }}
+      >
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Select Credential" />
+        </SelectTrigger>
+        <SelectContent>
+          {items.map((c) => (
+            <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+          ))}
+          <SelectItem value="__add__">+ Add Credential…</SelectItem>
+        </SelectContent>
+      </Select>
+    );
+  };
+
+  type FormRenderer = (fd: any, update: (k: string, v: any) => void) => React.ReactNode;
+
+  const nodeFormRenderers: Record<string, Record<string, FormRenderer>> = {
+    trigger: {
+      "manual-trigger": (fd, update) => (
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1">
+            <Label>Message</Label>
+            <Input
+              placeholder="Hello world"
+              value={fd.message || ""}
+              onChange={(e) => update("message", e.target.value)}
+            />
+          </div>
+        </div>
+      ),
+      "webhook-trigger": (fd, update) => (
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1">
+            <Label>Webhook URL</Label>
+            <Input
+              placeholder="https://..."
+              value={fd.url || ""}
+              onChange={(e) => update("url", e.target.value)}
+            />
+          </div>
+        </div>
+      ),
+    },
+    action: {
+      telegram: (fd, update) => (
+        <div className="flex flex-col gap-3">
+           <div className="flex flex-col gap-1">
+          <Label>Credential</Label>
+            <CredentialSelector appType="telegram" value={fd.credential} onChange={(v) => update("credential", v)} />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label>Chat ID</Label>
+            <Input
+              placeholder="123456789"
+              value={fd.chatId || ""}
+              onChange={(e) => update("chatId", e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label>Message</Label>
+            <Input
+              placeholder="Your message"
+              value={fd.message || ""}
+              onChange={(e) => update("message", e.target.value)}
+            />
+          </div>
+        </div>
+      ),
+      whatsapp: (fd, update) => (
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1">
+            <Label>Credential</Label>
+            <CredentialSelector appType="whatsapp" value={fd.credential} onChange={(v) => update("credential", v)} />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label>Recipient Phone</Label>
+            <Input
+              placeholder="+1..."
+              value={fd.phone || ""}
+              onChange={(e) => update("phone", e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label>Message</Label>
+            <Input
+              placeholder="Your message"
+              value={fd.message || ""}
+              onChange={(e) => update("message", e.target.value)}
+            />
+          </div>
+        </div>
+      ),
+      openai: (fd, update) => (
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1">
+            <Label>Credential</Label>
+            <CredentialSelector appType="openai" value={fd.credential} onChange={(v) => update("credential", v)} />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label>Prompt</Label>
+            <Input
+              placeholder="Write a poem about..."
+              value={fd.prompt || ""}
+              onChange={(e) => update("prompt", e.target.value)}
+            />
+          </div>
+        </div>
+      ),
+      resend: (fd, update) => (
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1">
+            <Label>Credential</Label>
+            <CredentialSelector appType="resend" value={fd.credential} onChange={(v) => update("credential", v)} />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label>To</Label>
+            <Input
+              placeholder="user@example.com"
+              value={fd.to || ""}
+              onChange={(e) => update("to", e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label>Subject</Label>
+            <Input
+              placeholder="Subject"
+              value={fd.subject || ""}
+              onChange={(e) => update("subject", e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label>Body</Label>
+            <Input
+              placeholder="Email body"
+              value={fd.body || ""}
+              onChange={(e) => update("body", e.target.value)}
+            />
+          </div>
+        </div>
+      ),
+      agent: (fd, update) => (
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1">
+            <Label>Model</Label>
+            <Input
+              placeholder="gpt-4o"
+              value={fd.model || ""}
+              onChange={(e) => update("model", e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label>Tools (comma separated)</Label>
+            <Input
+              placeholder="search, calculator"
+              value={fd.tools || ""}
+              onChange={(e) => update("tools", e.target.value)}
+            />
+          </div>
+        </div>
+      ),
+    },
+  };
+
+  const renderNodeForm = () => {
+    if (!selectedNode) return null;
+    const nodeKind = selectedNode.type || "";
+    const nodeType = (selectedNode.data as any)?.type || "";
+    const renderer = nodeFormRenderers[nodeKind]?.[nodeType];
+    if (renderer) return renderer(formData, updateForm);
+    return <div className="text-sm opacity-70">No configuration for this node type.</div>;
+  };
 
   useEffect(() => {
     const fetchWorkflow = async () => {
@@ -288,6 +590,7 @@ const WorkflowPage = () => {
           onEdgesChange={onEdgesChange}
           nodeTypes={nodeTypes}
           onConnect={onConnect}
+          onNodeClick={onNodeClick}
           fitView
           colorMode={theme}
           className="flex items-center justify-center"
@@ -335,7 +638,7 @@ const WorkflowPage = () => {
           <Controls orientation="horizontal"/>
         </ReactFlow>
       </div>
-
+    {/* Picker Sheet */}
       <Sheet open={isPickerOpen} onOpenChange={setIsPickerOpen}>
         <SheetContent>
           {pickerMode === "trigger" ? (
@@ -375,6 +678,76 @@ const WorkflowPage = () => {
           )}
         </SheetContent>
       </Sheet>
+
+   {/* Node Config Dialog */}
+      <Dialog open={isConfigOpen} onOpenChange={setIsConfigOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-kode">
+              {selectedNode ? `${(selectedNode.data as any)?.label || "Node"} Settings` : "Node Settings"}
+            </DialogTitle>
+            <DialogDescription className="font-inter">
+              Configure this {selectedNode?.type} node.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="mt-2">{renderNodeForm()}</div>
+
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setIsConfigOpen(false)}>Cancel</Button>
+            <Button className="bg-orange-500 hover:bg-orange-600" onClick={handleSaveNodeConfig}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+    {/* Credential Dialog */}
+      <Dialog open={isCredDialogOpen} onOpenChange={setIsCredDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-kode font-bold text-orange-500">
+              {credSelectedApp ? `Create ${credSelectedApp} Credential` : "Create Credential"}
+            </DialogTitle>
+            <DialogDescription>
+              Add a new credential to use in this action
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-3 font-inter">
+              <Input
+                placeholder="Credential Name"
+                value={credName}
+                onChange={(e) => setCredName(e.target.value)}
+              />
+              {credSelectedApp === "openai" && (
+                <OpenAICredentials onDataChange={setCredData} />
+              )}
+              {credSelectedApp === "telegram" && (
+                <TgCredentials onDataChange={setCredData} />
+              )}
+              {credSelectedApp === "whatsapp" && (
+                <WpCredentials onDataChange={setCredData} />
+              )}
+              {credSelectedApp === "resend" && (
+                <ResendCredential onDataChange={setCredData} />
+              )}
+              <Button
+                className="font-kode w-full bg-orange-500"
+                onClick={handleCreateCredential}
+                disabled={creatingCred || !credSelectedApp || !credName}
+              >
+                {creatingCred ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create Credential"
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
