@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/sheet";
 import axios from "axios";
 import { toast } from "sonner";
-import { FlaskConical, Loader2, Plus } from "lucide-react";
+import { FlaskConical, Loader2, Plus, Copy } from "lucide-react";
 import { TriggerCard, type Trigger } from "@/components/trigger-card";
 import { ActionCard } from "@/components/action-card";
 import { ActionNode, TriggerNode } from "@/components/custom-nodes";
@@ -261,18 +261,34 @@ const WorkflowPage = () => {
           </div>
         </div>
       ),
-      "webhook-trigger": (fd, update) => (
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-col gap-1">
-            <Label>Webhook URL</Label>
-            <Input
-              placeholder="https://..."
-              value={fd.url || ""}
-              onChange={(e) => update("url", e.target.value)}
-            />
+      "webhook-trigger": () => {
+        const url = id ? `http://localhost:3000/api/v1/webhook/${id}` : "";
+        const handleCopy = async () => {
+          try {
+            await navigator.clipboard.writeText(url);
+            toast.success("Webhook URL copied to clipboard");
+          } catch {
+            toast.error("Failed to copy URL");
+          }
+        };
+        return (
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1">
+              <Label>Webhook URL</Label>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Save workflow to get the URL"
+                  value={url}
+                  readOnly
+                />
+                <Button type="button" className="bg-orange-500" onClick={handleCopy}>
+                  <Copy className="h-4 w-4 mr-2" /> Copy
+                </Button>
+              </div>
+            </div>
           </div>
-        </div>
-      ),
+        );
+      },
     },
     action: {
       telegram: (fd, update) => (
@@ -530,7 +546,10 @@ const WorkflowPage = () => {
       id: newId,
       type: "trigger" as const,
       position: { x: 0, y: 0 },
-      data: { label: trigger.name, type: trigger.type },
+      data: { 
+        label: trigger.name, 
+        type: trigger.type,
+      },
     };
     setNodes((prev) => [...prev,triggerNode]);
     setIsPickerOpen(false);
@@ -706,7 +725,10 @@ const WorkflowPage = () => {
           </DialogHeader>
 
           <div className="mt-2">{renderNodeForm()}</div>
-          {!(selectedNode?.type === "trigger" && (selectedNode?.data as any)?.type === "manual-trigger") && (
+          {!(
+            selectedNode?.type === "trigger" &&
+            ((selectedNode?.data as any)?.type === "manual-trigger" || (selectedNode?.data as any)?.type === "webhook-trigger")
+          ) && (
             <DialogFooter>
               <Button variant="ghost" onClick={() => setIsConfigOpen(false)}>Cancel</Button>
               <Button className="bg-orange-500 hover:bg-orange-600" onClick={handleSaveNodeConfig}>Save</Button>
