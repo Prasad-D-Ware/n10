@@ -8,13 +8,16 @@ const createWorkflow = async(req: CustomRequest, res : Response) => {
 
         const user = req.user;
 
-        if(!name || !nodes || !edges ){
+        if(!name || !nodes || !edges || !flow){
             res.json({
                 success : false,
                 message : "Provide all inputs",
             })
             return;
         }
+
+        // const isWebhook = nodes[0].data.type === "webhook-trigger";
+        // console.log(isWebhook);
 
         const workflow = await prisma.workflow.create({
             data : {
@@ -44,7 +47,7 @@ const createWorkflow = async(req: CustomRequest, res : Response) => {
         console.log("Error while creating workflow")
         res.json({
             success : false,
-            message : "Error while Logging In",
+            message : "Error while Creating Workflow",
             error : error.message
         })
         return;

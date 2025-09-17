@@ -2,6 +2,7 @@ import { type Request, type Response } from "express";
 import { z } from "zod";
 import prisma from "../db/prisma";
 import type { CustomRequest } from "../middleware/auth";
+import type { Applications } from "../generated/prisma";
 
 const createCredentialSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -36,7 +37,7 @@ const createCredential = async (req: CustomRequest, res: Response) => {
       data: {
         user_id,
         name: data.name,
-        application: data.application,
+        application: data.application as Applications,
         data: data.data,
       },
     });
