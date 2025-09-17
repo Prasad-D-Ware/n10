@@ -3,7 +3,7 @@ import prisma from "../db/prisma";
 import type { CustomRequest } from "../middleware/auth";
 import executeNodes from "../execution-engine/engine";
 
-type Flow = {
+export type Flow = {
     nodes: any;
     edges: any;
 }
