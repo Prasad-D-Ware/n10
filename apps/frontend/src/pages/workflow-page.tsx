@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/sheet";
 import axios from "axios";
 import { toast } from "sonner";
-import { Loader2, Plus } from "lucide-react";
+import { FlaskConical, Loader2, Plus } from "lucide-react";
 import { TriggerCard, type Trigger } from "@/components/trigger-card";
 import { ActionCard } from "@/components/action-card";
 import { ActionNode, TriggerNode } from "@/components/custom-nodes";
@@ -254,15 +254,10 @@ const WorkflowPage = () => {
 
   const nodeFormRenderers: Record<string, Record<string, FormRenderer>> = {
     trigger: {
-      "manual-trigger": (fd, update) => (
+      "manual-trigger": () => (
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">
-            <Label>Message</Label>
-            <Input
-              placeholder="Hello world"
-              value={fd.message || ""}
-              onChange={(e) => update("message", e.target.value)}
-            />
+            <Button onClick={handleExecuteWorkflow} className="bg-orange-500"><FlaskConical />Execute Workflow</Button>
           </div>
         </div>
       ),
@@ -313,7 +308,7 @@ const WorkflowPage = () => {
           <div className="flex flex-col gap-1">
             <Label>Recipient Phone</Label>
             <Input
-              placeholder="+1..."
+              placeholder="+91-..."
               value={fd.phone || ""}
               onChange={(e) => update("phone", e.target.value)}
             />
@@ -541,6 +536,22 @@ const WorkflowPage = () => {
     setIsPickerOpen(false);
   };
 
+  const handleExecuteWorkflow = async () => {
+    const response = await axios.post("http://localhost:3000/api/v1/execute",{
+      workflowId: id
+    })
+
+    const data = response.data;
+
+    if(!data.success){
+      console.log("Error Executing Workflow" , data.error);
+      toast.error(data.message);
+      return;
+    }
+    
+    toast.success(data.message);
+  }
+
   if (loading) {
     return (
       <div className="m-16 mx-auto max-w-7xl w-full flex items-center justify-center h-[850px]">
@@ -602,6 +613,9 @@ const WorkflowPage = () => {
           }}
           // maxZoom={1}
         >
+          <Panel position="bottom-center">
+            <Button className="bg-orange-500 hover:bg-orange-700 hover:text-white hover:cursor-pointer" onClick={handleExecuteWorkflow}><FlaskConical/>Execute</Button>
+          </Panel>
           <MiniMap/>
           <Panel
             position="top-center"
@@ -692,11 +706,12 @@ const WorkflowPage = () => {
           </DialogHeader>
 
           <div className="mt-2">{renderNodeForm()}</div>
-
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setIsConfigOpen(false)}>Cancel</Button>
-            <Button className="bg-orange-500 hover:bg-orange-600" onClick={handleSaveNodeConfig}>Save</Button>
-          </DialogFooter>
+          {!(selectedNode?.type === "trigger" && (selectedNode?.data as any)?.type === "manual-trigger") && (
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setIsConfigOpen(false)}>Cancel</Button>
+              <Button className="bg-orange-500 hover:bg-orange-600" onClick={handleSaveNodeConfig}>Save</Button>
+            </DialogFooter>
+          )}
         </DialogContent>
       </Dialog>
 
