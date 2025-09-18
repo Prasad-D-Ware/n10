@@ -38,6 +38,7 @@ model Workflow {
   updated_at DateTime @default(now())
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  executions Execution[]
 }
 
 model Credential {
@@ -67,4 +68,36 @@ model AvailableTriggers {
   description String
   created_at  DateTime @default(now())
   updated_at  DateTime @default(now())
+}
+
+model Execution {
+  id         String   @id @default(cuid())
+  workflow_id String
+  started_at DateTime @default(now())
+  ended_at   DateTime?
+  status     ExecutionStatus @default(RUNNING)
+
+  workflow       Workflow       @relation(fields: [workflow_id], references: [id], onDelete: Cascade)
+  nodeExecutions NodeExecution[]
+}
+
+model NodeExecution {
+  id           String   @id @default(cuid())
+  execution_id String
+  node_id      String   // Assuming this is a unique identifier for the node from the workflow's 'nodes' Json
+  started_at   DateTime @default(now())
+  ended_at     DateTime?
+  status       ExecutionStatus
+  output       Json?    // Optional field to store node output data
+  error        Json?    // Optional field to store error details if failed
+
+  execution Execution @relation(fields: [execution_id], references: [id], onDelete: Cascade)
+
+  @@index([execution_id, node_id])
+}
+
+enum ExecutionStatus {
+  RUNNING
+  SUCCESS
+  FAILED
 }
