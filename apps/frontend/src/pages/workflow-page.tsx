@@ -92,6 +92,22 @@ const WorkflowPage = () => {
   const { id } = useParams();
   const [rfInstance, setRfInstance] = useState<ReactFlowInstance<Node, Edge> | null>(null);
   const [pendingViewport, setPendingViewport] = useState<{ x: number; y: number; zoom: number } | null>(null);
+  const [nodeStatuses, setNodeStatuses] = useState<Record<string, "IDLE" | "RUNNING" | "SUCCESS" | "FAILED">>({});
+  const [isExecuting, setIsExecuting] = useState(false);
+
+  // decorate nodes with status for styling
+  const decorateNodesWithStatus = useCallback(() => {
+    setNodes((prev) =>
+      prev.map((n) => {
+        const status = nodeStatuses[n.id] || "IDLE";
+        return { ...n, data: { ...(n.data as any), __status: status } } as Node;
+      })
+    );
+  }, [nodeStatuses]);
+
+  useEffect(() => {
+    decorateNodesWithStatus();
+  }, [nodeStatuses, decorateNodesWithStatus]);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [formData, setFormData] = useState<any>({});
@@ -258,7 +274,19 @@ const WorkflowPage = () => {
       "manual-trigger": () => (
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">
-            <Button onClick={handleExecuteWorkflow} className="bg-orange-500"><FlaskConical />Execute Workflow</Button>
+            <Button onClick={handleExecuteWorkflow} className="bg-orange-500" disabled={isExecuting}>
+              {isExecuting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Executing...
+                </>
+              ) : (
+                <>
+                  <FlaskConical />
+                  Execute Workflow
+                </>
+              )}
+            </Button>
           </div>
         </div>
       ),
@@ -557,19 +585,60 @@ const WorkflowPage = () => {
   };
 
   const handleExecuteWorkflow = async () => {
-    const response = await axios.post(`${BACKEND_URL}/execute`,{
-      workflowId: id
-    })
-
-    const data = response.data;
-
-    if(!data.success){
-      console.log("Error Executing Workflow" , data.error);
-      toast.error(data.message);
-      return;
+    setIsExecuting(true);
+    try {
+      const response = await axios.post(`${BACKEND_URL}/execute`,{
+        workflowId: id
+      })
+  
+      const data = response.data;
+  
+      if(!data.success){
+        console.log("Error Executing Workflow" , data.error);
+        toast.error(data.message);
+        setIsExecuting(false);
+        return;
+      }
+  
+      // reset statuses to idle
+      const next: Record<string, "IDLE" | "RUNNING" | "SUCCESS" | "FAILED"> = {};
+      for (const n of nodes) next[n.id] = "IDLE";
+      setNodeStatuses(next);
+  
+      // subscribe to SSE
+      const es = new EventSource(`${BACKEND_URL}/execute/stream`);
+      es.onmessage = (ev) => {
+        try {
+          const event = JSON.parse(ev.data);
+          if (!event?.executionId || event.executionId !== data.executionId) return;
+          const nodeId = event.nodeId as string;
+          const status = event.status as "RUNNING" | "SUCCESS" | "FAILED";
+          setNodeStatuses((prev) => ({ ...prev, [nodeId]: status }));
+          if (status === "FAILED" || status === "SUCCESS") {
+            // Check if all nodes are done (both trigger and action nodes)
+            const updatedStatuses = { ...nodeStatuses, [nodeId]: status };
+            const allDone = nodes.every((n) => 
+              updatedStatuses[n.id] === "SUCCESS" || updatedStatuses[n.id] === "FAILED"
+            );
+            if (allDone) {
+              es.close();
+              setIsExecuting(false);
+            }
+          }
+        } catch {
+          // ignore
+        }
+      };
+      es.onerror = () => {
+        es.close();
+        setIsExecuting(false);
+      };
+    } catch (error) {
+      setIsExecuting(false);
+      throw error;
+    } finally{
+      setIsExecuting(false);
     }
-    
-    toast.success(data.message);
   }
 
   if (loading) {
@@ -634,7 +703,19 @@ const WorkflowPage = () => {
           // maxZoom={1}
         >
           <Panel position="bottom-center">
-            <Button className="bg-orange-500 hover:bg-orange-700 hover:text-white hover:cursor-pointer" onClick={handleExecuteWorkflow}><FlaskConical/>Execute</Button>
+            <Button className="bg-orange-500 hover:bg-orange-700 hover:text-white hover:cursor-pointer" onClick={handleExecuteWorkflow} disabled={isExecuting}>
+              {isExecuting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Executing...
+                </>
+              ) : (
+                <>
+                  <FlaskConical/>
+                  Execute
+                </>
+              )}
+            </Button>
           </Panel>
           <MiniMap/>
           <Panel

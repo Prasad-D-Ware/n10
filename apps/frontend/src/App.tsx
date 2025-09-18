@@ -16,7 +16,7 @@ axios.defaults.withCredentials = true;
 function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <Toaster/>
+      <Toaster position="top-center" theme="dark"/>
       <SidebarProvider>
         <Routes>
           <Route element={<Landing />} path="/" />
