@@ -3,6 +3,7 @@ import prisma from "../db/prisma";
 import { ExecutionStatus } from "../generated/prisma";
 import type { CustomRequest } from "../middleware/auth";
 import executeNodes from "../execution-engine/engine";
+import { executionEvents } from "../index";
 
 export type Flow = {
     nodes: any;
@@ -50,22 +51,42 @@ const execute = async (req: CustomRequest, res: Response) => {
             return;
         }
 
-        try {
-            await executeNodes(workflowId, nodes, execution.id);
-            await prisma.execution.update({
-                where: { id: execution.id },
-                data: { status: ExecutionStatus.SUCCESS, ended_at: new Date() }
-            });
-            res.status(200).json({ success: true, message: "Workflow executed successfully" });
-            return;
-        } catch (err: any) {
-            await prisma.execution.update({
-                where: { id: execution.id },
-                data: { status: ExecutionStatus.FAILED, ended_at: new Date() }
-            });
-            res.status(200).json({ success: false, message: err?.message || "Workflow execution failed" });
-            return;
-        }
+        // Kick off execution asynchronously and return executionId immediately
+        (async () => {
+            try {
+                // emit trigger start and success for UI feedback
+                const triggerNode = nodes.find((n: any) => n.type === 'trigger');
+                if (triggerNode) {
+                    executionEvents.emit("update", { executionId: execution.id, nodeId: triggerNode.id, status: "RUNNING", ts: Date.now() });
+                }
+                
+                // If there are action nodes, engine will emit trigger SUCCESS when first action starts
+                const hasActionNodes = (nodes || []).some((n: any) => n.type !== 'trigger');
+                await executeNodes(workflowId, nodes, execution.id, triggerNode?.id);
+
+                if (!hasActionNodes && triggerNode) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    executionEvents.emit("update", { executionId: execution.id, nodeId: triggerNode.id, status: "SUCCESS", ts: Date.now() });
+                }
+                await prisma.execution.update({
+                    where: { id: execution.id },
+                    data: { status: ExecutionStatus.SUCCESS, ended_at: new Date() }
+                });
+            } catch (err: any) {
+                // Mark trigger as failed if there's an error
+                const triggerNode = nodes.find((n: any) => n.type === 'trigger');
+                if (triggerNode) {
+                    executionEvents.emit("update", { executionId: execution.id, nodeId: triggerNode.id, status: "FAILED", ts: Date.now() });
+                }
+                await prisma.execution.update({
+                    where: { id: execution.id },
+                    data: { status: ExecutionStatus.FAILED, ended_at: new Date() }
+                });
+            }
+        })();
+
+        res.status(202).json({ success: true, message: "Workflow execution started", executionId: execution.id });
+        return;
     } catch (error) {
         console.log("Error while executing workflow", error);
         res.status(500).json({ success: false, message: "Error while executing workflow" });

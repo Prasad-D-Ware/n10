@@ -3,13 +3,13 @@ import prisma from "../db/prisma";
 import executeNodes from "../execution-engine/engine";
 import type { Flow } from "./execution.controller";
 import { ExecutionStatus } from "../generated/prisma";
+import { executionEvents } from "../index";
 
 
 const webhookTrigger = async (req: Request, res: Response) => {
     try {
         const { workflowId } = req.params;
         
-        // Get the workflow by ID
         const workflow = await prisma.workflow.findUnique({
             where: { id: workflowId },
             select: {
@@ -52,14 +52,31 @@ const webhookTrigger = async (req: Request, res: Response) => {
         }
 
         try {
-            await executeNodes(workflowId as string, nodes, execution.id);
+            // Align trigger timing behavior with manual execution
+            const triggerNode = nodes.find((n: any) => n.type === 'trigger');
+            if (triggerNode) {
+                executionEvents.emit("update", { executionId: execution.id, nodeId: triggerNode.id, status: "RUNNING", ts: Date.now() });
+            }
+            const hasActionNodes = (nodes || []).some((n: any) => n.type !== 'trigger');
+            await executeNodes(workflowId as string, nodes, execution.id, triggerNode?.id);
+            if (!hasActionNodes && triggerNode) {
+                await new Promise(resolve => setTimeout(resolve, 500));
+                executionEvents.emit("update", { executionId: execution.id, nodeId: triggerNode.id, status: "SUCCESS", ts: Date.now() });
+            }
+            // console.log("execution done!")
             await prisma.execution.update({
                 where: { id: execution.id },
                 data: { status: ExecutionStatus.SUCCESS, ended_at: new Date() }
             });
+
+            // console.log(updatedExecution);
             res.status(200).json({ success: true, message: "Workflow executed successfully" });
             return;
         } catch (err: any) {
+            const triggerNode = nodes.find((n: any) => n.type === 'trigger');
+            if (triggerNode) {
+                executionEvents.emit("update", { executionId: execution.id, nodeId: triggerNode.id, status: "FAILED", ts: Date.now() });
+            }
             await prisma.execution.update({
                 where: { id: execution.id },
                 data: { status: ExecutionStatus.FAILED, ended_at: new Date() }

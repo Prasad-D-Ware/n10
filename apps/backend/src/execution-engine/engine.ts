@@ -3,6 +3,7 @@ import prisma from "../db/prisma";
 import TelegramBot from "node-telegram-bot-api";
 import axios from "axios";
 import { ExecutionStatus } from "../generated/prisma";
+import { executionEvents } from "../index";
 
 const getCredentials = async (data : any) => {
     const credentialId = data.config.credential;
@@ -23,12 +24,27 @@ const getCredentials = async (data : any) => {
     return credential.data;
 }
 
-const executeNodes = async (workflowId : string, nodes : any, executionId : string ) => {
+const executeNodes = async (workflowId : string, nodes : any, executionId : string, triggerNodeId? : string ) => {
     const actionNodes = nodes.filter((node : any) => node.type !== 'trigger');
+
+    if (actionNodes.length === 0) {
+        return;
+    }
+
+    let triggerSuccessEmitted = false;
 
     for (const node of actionNodes) {
         const { id : nodeId, data } = node;
         const credentialData = await getCredentials(data);
+
+        // Emit start event for node
+        executionEvents.emit("update", { executionId, nodeId, status: "RUNNING", ts: Date.now() });
+
+        // Mark trigger as SUCCESS when the first action starts running
+        if (!triggerSuccessEmitted && triggerNodeId) {
+            executionEvents.emit("update", { executionId, nodeId: triggerNodeId, status: "SUCCESS", ts: Date.now() });
+            triggerSuccessEmitted = true;
+        }
 
         switch (data.type) {
             case 'resend': {
@@ -56,6 +72,9 @@ const executeNodes = async (workflowId : string, nodes : any, executionId : stri
             default:
                 console.log("No Action executed");
         }
+
+        // Emit success for node
+        executionEvents.emit("update", { executionId, nodeId, status: "SUCCESS", ts: Date.now() });
     }
 }
 
@@ -95,6 +114,7 @@ const executeResend = async (data : any, credentialData:any, executionId : strin
                 error : error.message
             }
         })
+        executionEvents.emit("update", { executionId, nodeId, status: "FAILED", ts: Date.now(), error: error.message });
         return { error : error.message , success : false };
     }
 
@@ -136,7 +156,7 @@ const executeTelegram = async (data : any, credentialData : any, executionId : s
     let telegramData : any;
     try {
         telegramData = await bot.sendMessage(chatId, message);
-        console.log(telegramData);
+        // console.log(telegramData);
     } catch (error) {
         await prisma.nodeExecution.update({
             where : { id : nodeExecution.id },
@@ -146,6 +166,7 @@ const executeTelegram = async (data : any, credentialData : any, executionId : s
                 error : "Failed to send message"
             }
         })
+        executionEvents.emit("update", { executionId, nodeId, status: "FAILED", ts: Date.now(), error: "Failed to send message" });
         return { error : "Failed to send message" , success : false };
     }
 
