@@ -19,6 +19,7 @@ import { Button } from "./ui/button";
 import { ModeToggle } from "./mode-toggle";
 import { NavLink } from "react-router-dom";
 import axios from "axios";
+import { BACKEND_URL } from "@/lib/config";
 
 // Menu items.
 const items = [
@@ -39,7 +40,7 @@ export function AppSidebar() {
 
   const handleLogut = async () =>{
     try {
-      const response = await axios.post('http://localhost:3000/api/v1/auth/logout');
+      const response = await axios.post(`${BACKEND_URL}/auth/logout`);
   
       if (response.data.success) {
         localStorage.removeItem('token');

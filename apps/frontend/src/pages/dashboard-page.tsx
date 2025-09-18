@@ -27,6 +27,7 @@ import { toast } from "sonner";
 import { CredentialsCards } from "@/components/credential-card";
 import { Loader2 } from "lucide-react";
 import { WorkflowCards } from "@/components/workflows-card";
+import { BACKEND_URL } from "@/lib/config";
 
 const demoApplications = [
   { key: "telegram", name: "Telegram" },
@@ -72,7 +73,7 @@ const DashBoardPage = () => {
     setLoadingWorkflow(true);
     try {
       const response = await axios.get(
-        "http://localhost:3000/api/v1/workflows"
+        `${BACKEND_URL}/workflows`
       );
 
       const data = response.data;
@@ -100,7 +101,7 @@ const DashBoardPage = () => {
 
   const fetchAllCredentials = async () => {
     const response = await axios.get(
-      "http://localhost:3000/api/v1/credentials"
+      `${BACKEND_URL}/credentials`
     );
 
     const data = response.data;
@@ -134,7 +135,7 @@ const DashBoardPage = () => {
       // console.log(payload);
 
       const response = await axios.post(
-        "http://localhost:3000/api/v1/credentials/create",
+        `${BACKEND_URL}/credentials/create`,
         payload
       );
 
@@ -165,7 +166,7 @@ const DashBoardPage = () => {
   const handleUpdateCredential = async (updated: Credentials) => {
     try {
       const response = await axios.put(
-        `http://localhost:3000/api/v1/credentials/${updated.id}`,
+        `${BACKEND_URL}/credentials/${updated.id}`,
         {
           name: updated.name,
           data: updated.data,
@@ -196,7 +197,7 @@ const DashBoardPage = () => {
   const handleDeleteCredential = async (id: string) => {
     try {
       const response = await axios.delete(
-        `http://localhost:3000/api/v1/credentials/${id}`
+        `${BACKEND_URL}/credentials/${id}`
       );
       const data = response.data;
       if (!data.success) {

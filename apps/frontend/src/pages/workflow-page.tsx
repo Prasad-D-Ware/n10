@@ -45,6 +45,7 @@ import OpenAICredentials from "@/components/openai-credentials";
 import TgCredentials from "@/components/tg-credentials";
 import ResendCredential from "@/components/resend-credential";
 import WpCredentials from "@/components/wp-credentials";
+import { BACKEND_URL } from "@/lib/config";
 
 
 const nodeTypes = {
@@ -170,7 +171,7 @@ const WorkflowPage = () => {
 
   const fetchAllCredentials = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/v1/credentials");
+      const response = await axios.get(`${BACKEND_URL}/credentials`);
       const data = response.data;
       if (!data.success) {
         return;
@@ -201,7 +202,7 @@ const WorkflowPage = () => {
     setCreatingCred(true);
     try {
       const payload = { name: credName, application: credSelectedApp, data: credData };
-      const response = await axios.post("http://localhost:3000/api/v1/credentials/create", payload);
+      const response = await axios.post(`${BACKEND_URL}/credentials/create`, payload);
       const data = response.data;
       if (!data.success) {
         toast.error(data.message || "Failed to create credential");
@@ -262,7 +263,7 @@ const WorkflowPage = () => {
         </div>
       ),
       "webhook-trigger": () => {
-        const url = id ? `http://localhost:3000/api/v1/webhook/${id}` : "";
+        const url = id ? `${BACKEND_URL}/webhook/${id}` : "";
         const handleCopy = async () => {
           try {
             await navigator.clipboard.writeText(url);
@@ -425,7 +426,7 @@ const WorkflowPage = () => {
       
       setLoading(true);
       try {
-        const response = await axios.get(`http://localhost:3000/api/v1/workflows/${id}`);
+        const response = await axios.get(`${BACKEND_URL}/workflows/${id}`);
 
         if (response.data.success) {
           const workflow = response.data.workflow;
@@ -457,7 +458,7 @@ const WorkflowPage = () => {
   }, [id]);
 
   const handleAddTrigger = async () => {
-    const response = await axios.get("http://localhost:3000/api/v1/availableTrigger");
+    const response = await axios.get(`${BACKEND_URL}/availableTrigger`);
 
     const data = response.data;
 
@@ -496,7 +497,7 @@ const WorkflowPage = () => {
     console.log(flow);
     try {
       if(id){
-        const response = await axios.put(`http://localhost:3000/api/v1/workflows/${id}`,{
+        const response = await axios.put(`${BACKEND_URL}/workflows/${id}`,{
           name : workflowName,
           enabled : enable,
           nodes,
@@ -512,7 +513,7 @@ const WorkflowPage = () => {
 
         toast.success(response.data.message);
       } else { 
-        const response = await axios.post("http://localhost:3000/api/v1/workflows/create",{
+        const response = await axios.post(`${BACKEND_URL}/workflows/create`,{
         name : workflowName,
         enabled : enable,
         nodes,
@@ -556,7 +557,7 @@ const WorkflowPage = () => {
   };
 
   const handleExecuteWorkflow = async () => {
-    const response = await axios.post("http://localhost:3000/api/v1/execute",{
+    const response = await axios.post(`${BACKEND_URL}/execute`,{
       workflowId: id
     })
 

@@ -14,6 +14,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import logo from "../assets/n10-logo.png"
+import { BACKEND_URL } from "@/lib/config"
 
 export function Login() {
   const [email, setEmail] = useState("")
@@ -26,7 +27,8 @@ export function Login() {
     setIsLoading(true)
     
     try {
-      const response = await axios.post("http://localhost:3000/api/v1/auth/login", {
+      console.log(BACKEND_URL);
+      const response = await axios.post(`${BACKEND_URL}/auth/login`, {
         email: email,
         password: password
       })

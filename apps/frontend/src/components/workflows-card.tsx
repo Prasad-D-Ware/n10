@@ -4,6 +4,7 @@ import { formatDistanceToNow } from "date-fns"
 import { useNavigate } from "react-router-dom"
 import { Trash2 } from "lucide-react"
 import axios from "axios"
+import { BACKEND_URL } from "@/lib/config"
 import { useState } from "react"
 
 interface Workflow {
@@ -42,7 +43,7 @@ export function WorkflowCards({ workflows, onWorkflowDeleted }: WorkflowCardsPro
     setDeletingId(workflowId);
     
     try {
-      await axios.delete(`http://localhost:3000/api/v1/workflows/${workflowId}`);
+      await axios.delete(`${BACKEND_URL}/workflows/${workflowId}`);
       onWorkflowDeleted?.(workflowId);
     } catch (error) {
       console.error('Error deleting workflow:', error);
