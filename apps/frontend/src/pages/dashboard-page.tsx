@@ -26,6 +26,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { CredentialsCards } from "@/components/credential-card";
 import { Loader2 } from "lucide-react";
+import ExecutionsCards from "@/components/executions-card";
 import { WorkflowCards } from "@/components/workflows-card";
 import { BACKEND_URL } from "@/lib/config";
 
@@ -61,13 +62,35 @@ const DashBoardPage = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [workflows,setWorkflows] = useState([]);
   const [loadingWorkflow,setLoadingWorkflow] = useState(false);
+  const [executions,setExecutions] = useState([]);
+  const [loadingExecutions,setLoadingExecutions] = useState(false);
 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchAllCredentials();
     fetchAllWorkflows();
+    fetchAllExecutions();
   }, []);
+
+  const fetchAllExecutions = async () => {
+    setLoadingExecutions(true);
+    try {
+      const response = await axios.get(`${BACKEND_URL}/execute`);
+
+      const data = response.data;
+
+      if (!data.success) {
+        console.log(data.error);
+        return;
+      }
+      setExecutions(data.executions);
+    } catch (error) {
+      console.log("Error fetching executions:", error);
+    } finally {
+      setLoadingExecutions(false);
+    }
+  }
 
   const fetchAllWorkflows = async () => {
     setLoadingWorkflow(true);
@@ -100,9 +123,7 @@ const DashBoardPage = () => {
   };
 
   const fetchAllCredentials = async () => {
-    const response = await axios.get(
-      `${BACKEND_URL}/credentials`
-    );
+    const response = await axios.get(`${BACKEND_URL}/credentials`);
 
     const data = response.data;
 
@@ -134,10 +155,7 @@ const DashBoardPage = () => {
       };
       // console.log(payload);
 
-      const response = await axios.post(
-        `${BACKEND_URL}/credentials/create`,
-        payload
-      );
+      const response = await axios.post(`${BACKEND_URL}/credentials/create`,payload);
 
       const data = response.data;
 
@@ -165,9 +183,7 @@ const DashBoardPage = () => {
 
   const handleUpdateCredential = async (updated: Credentials) => {
     try {
-      const response = await axios.put(
-        `${BACKEND_URL}/credentials/${updated.id}`,
-        {
+      const response = await axios.put(`${BACKEND_URL}/credentials/${updated.id}`,{
           name: updated.name,
           data: updated.data,
         }
@@ -301,7 +317,7 @@ const DashBoardPage = () => {
           <TabsList>
             <TabsTrigger value="workflows">Workflows</TabsTrigger>
             <TabsTrigger value="credentials">Credentials</TabsTrigger>
-            {/* <TabsTrigger value="executions">Executions</TabsTrigger> */}
+            <TabsTrigger value="executions">Executions</TabsTrigger>
           </TabsList>
           <TabsContent value="workflows">
           {loadingWorkflow ? (
@@ -324,9 +340,15 @@ const DashBoardPage = () => {
               />
             )}
           </TabsContent>
-          {/* <TabsContent value="executions">
-            TODO : /// executions
-          </TabsContent> */}
+          <TabsContent value="executions">
+          {loadingExecutions ? (
+              <div className="h-[600px] w-full justify-center flex items-center">
+                <Loader2 className="animate-spin text-orange-500" />
+              </div>
+            ) : (
+                <ExecutionsCards executions={executions as any} />
+            )}
+          </TabsContent>
         </Tabs>
       </div>
     </div>
