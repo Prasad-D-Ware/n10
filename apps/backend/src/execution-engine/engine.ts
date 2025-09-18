@@ -2,11 +2,12 @@ import { Resend } from "resend";
 import prisma from "../db/prisma";
 import TelegramBot from "node-telegram-bot-api";
 import axios from "axios";
+import { ExecutionStatus } from "../generated/prisma";
 
 const getCredentials = async (data : any) => {
     const credentialId = data.config.credential;
     if (!credentialId){
-        return new Error("No credentials added!");
+        throw new Error("No credentials added!");
     }
     const credential = await prisma.credential.findUnique({
         where: { id: credentialId  },
@@ -22,22 +23,29 @@ const getCredentials = async (data : any) => {
     return credential.data;
 }
 
-const executeNodes = async (workflowId : string, nodes : any ) => {
+const executeNodes = async (workflowId : string, nodes : any, executionId : string ) => {
     const actionNodes = nodes.filter((node : any) => node.type !== 'trigger');
-    
-    actionNodes.forEach(async (node : any) => {
-        const { data } = node;
+
+    for (const node of actionNodes) {
+        const { id : nodeId, data } = node;
         const credentialData = await getCredentials(data);
-       
-        switch(data.type){
-            case 'resend':
-                await executeResend(data , credentialData);
+
+        switch (data.type) {
+            case 'resend': {
+                const emailData = await executeResend(data, credentialData, executionId, nodeId);
+                if (!emailData.success) {
+                    throw new Error(emailData.error || 'Resend execution failed');
+                }
                 break;
+            }
             case 'telegram':
-                await executeTelegram(data,credentialData);
+                const telegramData = await executeTelegram(data, credentialData, executionId, nodeId);
+                if (!telegramData.success) {
+                    throw new Error(telegramData.error || 'Telegram execution failed');
+                }
                 break;
             case 'whatsapp':
-                await executeWhatsapp(data,credentialData);
+                await executeWhatsapp(data, credentialData);
                 break;
             case 'openai':
                 await executeOpenai(data);
@@ -45,13 +53,26 @@ const executeNodes = async (workflowId : string, nodes : any ) => {
             case 'agent':
                 await executeAgent(data);
                 break;
-            case "default" : 
-                console.log("No Action executed")
+            default:
+                console.log("No Action executed");
         }
-    });
+    }
 }
 
-const executeResend = async (data : any, credentialData:any ) => {
+const executeResend = async (data : any, credentialData:any, executionId : string, nodeId : string ) => {
+
+    const nodeExecution = await prisma.nodeExecution.create({
+        data : {
+            execution_id : executionId,
+            node_id : nodeId,
+            status : ExecutionStatus.RUNNING
+        }
+    })
+
+    if(!nodeExecution){
+        return { error : "Failed to create node execution" , success : false };
+    }
+
     // console.log("Executing resend", data);
     const { to , body , subject } = data.config;
     const { apikey } = credentialData;
@@ -66,21 +87,82 @@ const executeResend = async (data : any, credentialData:any ) => {
     });
     
     if(error) {
-        return error;
+        await prisma.nodeExecution.update({
+            where : { id : nodeExecution.id },
+            data : {
+                status : ExecutionStatus.FAILED,
+                ended_at : new Date(),
+                error : error.message
+            }
+        })
+        return { error : error.message , success : false };
     }
 
-    return emailData;
+    const updatedNodeExecution = await prisma.nodeExecution.update({
+        where : { id : nodeExecution.id },
+        data : {
+            status : ExecutionStatus.SUCCESS,
+            ended_at : new Date(),
+            output : emailData as any
+        }
+    })
+
+    if(!updatedNodeExecution){
+        return { error : "Failed to update node execution" , success : false };
+    }
+
+    return { data : emailData , success : true };
 }
 
-const executeTelegram = async (data : any, credentialData : any) => {
+const executeTelegram = async (data : any, credentialData : any, executionId : string, nodeId : string) => {
     // console.log("Executing telegram", data);
+
+    const nodeExecution = await prisma.nodeExecution.create({
+        data : {
+            execution_id : executionId,
+            node_id : nodeId,
+            status : ExecutionStatus.RUNNING
+        }
+    })
+
+    if(!nodeExecution){
+        return { error : "Failed to create node execution" , success : false };
+    }
 
     const { chatId, message } = data.config;
     const { apikey } = credentialData;
 
     const bot = new TelegramBot(apikey);
+    let telegramData : any;
+    try {
+        telegramData = await bot.sendMessage(chatId, message);
+        console.log(telegramData);
+    } catch (error) {
+        await prisma.nodeExecution.update({
+            where : { id : nodeExecution.id },
+            data : {
+                status : ExecutionStatus.FAILED,
+                ended_at : new Date(),
+                error : "Failed to send message"
+            }
+        })
+        return { error : "Failed to send message" , success : false };
+    }
 
-    await bot.sendMessage(chatId, message);
+    const updatedNodeExecution = await prisma.nodeExecution.update({
+        where : { id : nodeExecution.id },
+        data : {
+            status : ExecutionStatus.SUCCESS,
+            ended_at : new Date(),
+            output : telegramData as any
+        }
+    })
+
+    if(!updatedNodeExecution){
+        return { error : "Failed to update node execution" , success : false };
+    }
+
+    return { data : telegramData , success : true };
 }
 
 const executeWhatsapp = async (data : any,  credentialData : any) => {
