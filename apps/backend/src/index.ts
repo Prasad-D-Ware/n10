@@ -8,6 +8,7 @@ import availableTriggerRouter from "./routers/available-triggers.router";
 import executeRouter from "./routers/execution.router";
 import webhookRouter from "./routers/webhook.router";
 import { EventEmitter } from "events";
+import analyticRouter from "./routers/analytic.router";
 
 export const executionEvents = new EventEmitter();
 
@@ -26,6 +27,7 @@ app.use("/api/v1/workflows", workflowRouter);
 app.use("/api/v1/availableTrigger", availableTriggerRouter);
 app.use("/api/v1/execute", executeRouter);
 app.use("/api/v1/webhook", webhookRouter);
+app.use("/api/v1/analytics", analyticRouter);
 
 // SSE endpoint for real-time execution updates
 app.get("/api/v1/execute/stream", (req, res) => {
