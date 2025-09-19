@@ -1,4 +1,4 @@
-import { Home, LogOut, Settings } from "lucide-react";
+import { Home, LineChart, LogOut, Settings } from "lucide-react";
 import n10Logo from "@/assets/n10-logo.png";
 
 import {
@@ -29,9 +29,9 @@ const items = [
     icon: Home,
   },
   {
-    title: "Settings",
-    url: "/settings",
-    icon: Settings,
+    title: "Analytics",
+    url: "/analytics",
+    icon: LineChart,
   },
 ];
 

@@ -10,6 +10,7 @@ import WorkflowPage from "./pages/workflow-page";
 import { ThemeProvider } from "./components/theme-provider";
 import { Toaster } from "sonner";
 import axios from "axios";
+import SettingsPage from "./pages/settings-page";
 
 axios.defaults.withCredentials = true;
 
@@ -25,6 +26,7 @@ function App() {
           <Route element={<><AppSidebar/><DashBoardPage /></>} path="/dashboard" />
           <Route element={<><AppSidebar/><WorkflowPage /></>} path="/workflows" />
           <Route element={<><AppSidebar/><WorkflowPage /></>} path="/workflows/:id" />
+          <Route element={<><AppSidebar/><SettingsPage /></>} path="/analytics" />
         </Routes>
       </SidebarProvider>
       </ThemeProvider>
