@@ -1,135 +1,249 @@
-# Turborepo starter
+# N10 - Visual Workflow Automation Platform
 
-This Turborepo starter is maintained by the Turborepo core team.
+N10 is a powerful visual workflow automation platform that allows users to create, manage, and execute automated workflows through an intuitive drag-and-link interface. Built with modern web technologies, N10 enables seamless integration with popular services like WhatsApp, Telegram, OpenAI, and Resend.
 
-## Using this example
+## 🚀 Features
 
-Run the following command:
+### Visual Workflow Builder
 
-```sh
-npx create-turbo@latest
+- **Drag-and-Link Interface**: Create workflows using an intuitive visual editor powered by React Flow
+- **Real-time Execution**: Watch your workflows execute in real-time with live status updates
+- **Node-based Architecture**: Connect triggers and actions through a visual node system
+- **Workflow Management**: Save, edit, enable/disable workflows with ease
+
+### Supported Integrations
+
+- **Telegram Bot API**: Send messages through Telegram bots
+- **Resend For GMAIL**: Send transactional emails
+- **WhatsApp Business API**: Send messages via WhatsApp Business
+- **OpenAI API**: Integrate AI capabilities into your workflows
+- **AI Agent**: Advanced AI agent capabilities (in development)
+
+### Triggers
+
+- **Manual Trigger**: Execute workflows manually from the dashboard
+- **Webhook Trigger**: Trigger workflows via HTTP webhooks
+- **Real-time Execution**: Live execution monitoring with status updates
+
+### User Management
+
+- **Authentication**: Secure user registration and login
+- **Credential Management**: Securely store and manage API credentials
+- **User Dashboard**: Comprehensive analytics and workflow overview
+
+### Analytics & Monitoring
+
+- **Execution Analytics**: Track successful and failed executions
+- **Performance Metrics**: Monitor average execution times
+- **Real-time Status**: Live execution status updates
+- **Workflow Statistics**: Comprehensive workflow performance data
+
+## 🏗️ Architecture
+
+### Tech Stack
+
+- **Frontend**: React 19, TypeScript, Vite, Tailwind CSS
+- **Backend**: Bun runtime, Express.js, TypeScript
+- **Database**: PostgreSQL with Prisma ORM
+- **UI Components**: Radix UI, Lucide React icons
+- **Workflow Engine**: Custom execution engine with real-time updates
+- **Monorepo**: Turborepo for efficient development
+
+### Project Structure
+
+```text
+n10/
+├── apps/
+│   ├── frontend/          # React frontend application
+│   └── backend/           # Bun/Express backend API
+├── packages/
+│   ├── ui/               # Shared UI components
+│   ├── eslint-config/    # Shared ESLint configuration
+│   └── typescript-config/ # Shared TypeScript configuration
+└── turbo.json           # Turborepo configuration
 ```
 
-## What's inside?
+## 🚀 Quick Start
 
-This Turborepo includes the following packages/apps:
+### Prerequisites
 
-### Apps and Packages
+- Node.js 18+
+- Bun 1.2.16+
+- PostgreSQL database
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+### Installation
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+1. **Clone the repository**
 
-### Utilities
+   ```bash
+   git clone <repository-url>
+   cd n10
+   ```
 
-This Turborepo has some additional tools already setup for you:
+2. **Install dependencies**
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+   ```bash
+   bun install
+   ```
 
-### Build
+3. **Set up environment variables**
 
-To build all apps and packages, run the following command:
+   Create a `.env` file in the `apps/backend` directory:
 
+   ```env
+   DATABASE_URL="postgresql://username:password@localhost:5432/n10"
+   JWT_SECRET="your-jwt-secret"
+   ```
+
+4. **Set up the database**
+
+   ```bash
+   cd apps/backend
+   bun prisma migrate dev
+   bun prisma generate
+   ```
+
+5. **Start the development servers**
+
+   ```bash
+   # From the root directory
+   bun run dev
+   ```
+
+   This will start:
+
+   - Frontend: <http://localhost:5173>
+   - Backend: <http://localhost:3000>
+
+## 📖 Usage Guide
+
+### Creating Your First Workflow
+
+1. **Sign Up/Login**: Create an account or login to access the dashboard
+2. **Add Credentials**: Go to Settings to add API credentials for your integrations
+3. **Create Workflow**: Navigate to Workflows and click "Create New"
+4. **Add Trigger**: Choose how your workflow should be triggered (Manual or Webhook)
+5. **Add Actions**: Drag and drop action nodes for your integrations
+6. **Configure Nodes**: Click on each node to configure settings and select credentials
+7. **Save & Enable**: Save your workflow and enable it for execution
+
+### Supported Actions
+
+
+#### Telegram
+
+- Send messages via Telegram bot
+- Requires BotFather token
+
+#### Email (Resend)
+
+- Send transactional emails
+- Requires Resend API key
+
+#### OpenAI
+
+- Integrate AI capabilities
+- Requires OpenAI API key
+
+#### WhatsApp
+
+- Send text messages to WhatsApp Business numbers
+- Requires Meta Business API credentials
+
+
+### Webhook Integration
+
+1. Create a workflow with a webhook trigger
+2. Save the workflow to get the webhook URL
+3. Use the webhook URL to trigger workflows from external systems
+4. Webhook URL format: `https://your-domain.com/webhook/{workflow-id}`
+
+## 🔧 API Reference
+
+### Authentication Endpoints
+
+- `POST /auth/register` - User registration
+- `POST /auth/login` - User login
+- `POST /auth/logout` - User logout
+
+### Workflow Endpoints
+
+- `GET /workflows` - Get all user workflows
+- `POST /workflows/create` - Create new workflow
+- `PUT /workflows/:id` - Update workflow
+- `GET /workflows/:id` - Get specific workflow
+- `DELETE /workflows/:id` - Delete workflow
+
+### Execution Endpoints
+
+- `POST /execute` - Execute workflow manually
+- `GET /execute/stream` - Stream execution updates (SSE)
+- `POST /webhook/:workflowId` - Trigger workflow via webhook
+
+### Credential Endpoints
+
+- `GET /credentials` - Get user credentials
+- `POST /credentials/create` - Create new credential
+- `PUT /credentials/:id` - Update credential
+- `DELETE /credentials/:id` - Delete credential
+
+### Analytics Endpoints
+
+- `GET /analytics` - Get user analytics data
+
+## 🛠️ Development
+
+### Building for Production
+
+```bash
+bun run build
 ```
-cd my-turborepo
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
+### Database Management
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+```bash
+# Generate Prisma client
+bun prisma generate
+
+# Run migrations
+bun prisma migrate dev
+
+# Reset database
+bun prisma migrate reset
 ```
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+### Code Quality
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+```bash
+# Lint code
+bun run lint
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+# Format code
+bun run format
 
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
+# Type checking
+bun run check-types
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+## 🚀 Deployment
 
+### Environment Setup
+
+1. Set up PostgreSQL database
+2. Configure environment variables
+3. Run database migrations
+4. Build and deploy both frontend and backend
+
+### Docker Deployment (Optional)
+
+```dockerfile
+# Example Dockerfile for backend
+FROM oven/bun:1.2.16
+WORKDIR /app
+COPY package.json bun.lockb ./
+RUN bun install
+COPY . .
+RUN bun run build
+EXPOSE 3000
+CMD ["bun", "run", "start"]
 ```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
