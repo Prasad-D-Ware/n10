@@ -29,7 +29,7 @@ export const ActionNode = ({data} :{data: any}) => {
         <Handle type="target" position={Position.Left} />
         {data.type === "telegram" && <img src={telegram} alt="telegram" className="w-6 h-6" />}
         {data.type === "whatsapp" && <img src={whatsapp} alt="whatsapp" className="w-6 h-6" />}
-        {data.type === "openai" && <img src={openai} alt="openai" className="w-6 h-6" />}
+        {data.type === "openai" && <div className="flex items-center justify-center gap-2 "><img src={openai} alt="openai" className="w-6 h-6" /> <div className="font-kode text-xs">Send Message</div></div>}
         {data.type === "resend" && <img src={resend} alt="resend" className="w-6 h-6" />}
         {data.type === "agent" && <Bot className="w-6 h-6" />}
         {status === "RUNNING" && <Loader2 className="w-4 h-4 ml-1 animate-spin text-blue-500" />}
