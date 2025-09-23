@@ -59,6 +59,7 @@ enum Applications {
   openai
   telegram
   resend
+  solana
 }
 
 model AvailableTriggers {

@@ -6,6 +6,9 @@ import { ExecutionStatus } from "../generated/prisma";
 import { executionEvents } from "../index";
 import { OpenAI } from "openai";
 
+import bs58 from "bs58"
+import { Connection, Keypair, LAMPORTS_PER_SOL, PublicKey, sendAndConfirmTransaction, SystemProgram, Transaction } from "@solana/web3.js";
+
 const getCredentials = async (data : any) => {
     const credentialId = data.config.credential;
     if (!credentialId){
@@ -65,6 +68,12 @@ const executeNodes = async (workflowId : string, nodes : any, executionId : stri
                 }
                 executedIds.push(nodeId);
                 break;
+            case  'solana' : 
+                const solanaTransaction = await sendSolana(data, credentialData, executionId , nodeId);
+                if (!solanaTransaction.success) {
+                    throw new Error(solanaTransaction.error || 'Solana execution failed');
+                }
+                break;
             case 'whatsapp':
                 await executeWhatsapp(data, credentialData);
                 break;
@@ -98,6 +107,8 @@ const executeResend = async (data : any, credentialData:any, executionId : strin
     })
 
     if(!nodeExecution){
+        // Emit FAILED if we cannot even create the node execution row
+        executionEvents.emit("update", { executionId, nodeId, status: "FAILED", ts: Date.now(), error: "Failed to create node execution" });
         return { error : "Failed to create node execution" , success : false };
     }
 
@@ -118,6 +129,15 @@ const executeResend = async (data : any, credentialData:any, executionId : strin
         })
         console.log("previous node output",response)
         if(!response?.output){
+            await prisma.nodeExecution.update({
+                where : { id : nodeExecution.id },
+                data : {
+                    status : ExecutionStatus.FAILED,
+                    ended_at : new Date(),
+                    error : "Body is required"
+                }
+            })
+            executionEvents.emit("update", { executionId, nodeId, status: "FAILED", ts: Date.now(), error: "Body is required" });
             return { success : false , error : "Body is required" };
         }
 
@@ -174,6 +194,7 @@ const executeTelegram = async (data : any, credentialData : any, executionId : s
     })
 
     if(!nodeExecution){
+        executionEvents.emit("update", { executionId, nodeId, status: "FAILED", ts: Date.now(), error: "Failed to create node execution" });
         return { error : "Failed to create node execution" , success : false };
     }
 
@@ -193,6 +214,15 @@ const executeTelegram = async (data : any, credentialData : any, executionId : s
         })
         console.log("previous node output",response)
         if(!response?.output){
+            await prisma.nodeExecution.update({
+                where : { id : nodeExecution.id },
+                data : {
+                    status : ExecutionStatus.FAILED,
+                    ended_at : new Date(),
+                    error : "Body is required"
+                }
+            })
+            executionEvents.emit("update", { executionId, nodeId, status: "FAILED", ts: Date.now(), error: "Body is required" });
             return { success : false , error : "Body is required" };
         }
         message = response?.output as string;
@@ -324,6 +354,88 @@ const executeOpenai = async (data : any,credentialData : any ,executionId : stri
 
 const executeAgent = async (data : any) => {
     console.log("Executing agent", data);
+}
+
+const sendSolana = async (data : any, credentialData : any ,executionId : string, nodeId : string ) => {
+    console.log("Sending solana", data);
+
+    const { privateKey } = credentialData;
+    const { address, amount } = data.config;
+
+    const nodeExecution = await prisma.nodeExecution.create({
+        data : {
+            execution_id : executionId,
+            node_id : nodeId,
+            status : ExecutionStatus.RUNNING
+        }
+    })
+
+    if(!nodeExecution){
+        executionEvents.emit("update", { executionId, nodeId, status: "FAILED", ts: Date.now(), error: "Failed to create node execution" });
+        return { error : "Failed to create node execution" , success : false };
+    }
+
+    if(!address || !amount || !privateKey){
+        await prisma.nodeExecution.update({
+            where : { id : nodeExecution.id },
+            data : {
+                status : ExecutionStatus.FAILED,
+                ended_at : new Date(),
+                error : "No data provided for address or amount or privatekey"
+            }
+        })
+        executionEvents.emit("update", { executionId, nodeId, status: "FAILED", ts: Date.now(), error: "Missing address/amount/privateKey" });
+        return { error : "No data provided for address or amount or privatekey", success : false };
+    }
+
+    const secretKey = bs58.decode(privateKey);
+
+    const payer = Keypair.fromSecretKey(secretKey);
+
+    const connection = new Connection("https://api.devnet.solana.com");
+
+    const tx = new Transaction().add(
+        SystemProgram.transfer({
+            toPubkey : new PublicKey(address),
+            fromPubkey : payer.publicKey,
+            lamports : Number(amount) * LAMPORTS_PER_SOL
+        })
+    )
+
+    tx.feePayer = payer.publicKey;
+	tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+
+    let solanaTransaction;
+    try {
+         solanaTransaction = await sendAndConfirmTransaction(connection, tx, [payer]);
+    } catch (error : any) {
+        await prisma.nodeExecution.update({
+            where : { id : nodeExecution.id },
+            data : {
+                status : ExecutionStatus.FAILED,
+                ended_at : new Date(),
+                error : "Failed to send solana"
+            }
+        })
+        executionEvents.emit("update", { executionId, nodeId, status: "FAILED", ts: Date.now(), error: "Failed to send Solana" });
+        console.log("Error while transacting :",error.message);
+        return { success : false , message: "Transaction Failed" }
+    }
+
+    const updatedNodeExecution = await prisma.nodeExecution.update({
+        where : { id : nodeExecution.id },
+        data : {
+            status : ExecutionStatus.SUCCESS,
+            ended_at : new Date(),
+            output : solanaTransaction as any
+        }
+    })
+
+    if(!updatedNodeExecution){
+        return { error : "Failed to update node execution" , success : false };
+    }
+
+    return { data : solanaTransaction , success : true };
 }
 
 export default executeNodes;

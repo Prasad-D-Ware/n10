@@ -11,6 +11,7 @@ const createCredentialSchema = z.object({
     apikey: z.string().optional(),
     accessToken: z.string().optional(),
     businessAccountId: z.string().optional(),
+    privateKey: z.string().optional(),
   }),
 });
 
