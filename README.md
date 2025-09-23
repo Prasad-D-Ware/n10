@@ -17,6 +17,7 @@ N10 is a powerful visual workflow automation platform that allows users to creat
 - **Resend For GMAIL**: Send transactional emails
 - **WhatsApp Business API**: Send messages via WhatsApp Business
 - **OpenAI API**: Integrate AI capabilities into your workflows
+- **Solana**: Store wallet credentials (private key) for use in Solana actions
 - **AI Agent**: Advanced AI agent capabilities (in development)
 
 ### Triggers
@@ -95,6 +96,12 @@ n10/
    JWT_SECRET="your-jwt-secret"
    ```
 
+   Optionally, in `apps/frontend`, create a `.env` file to point to your backend (defaults to `http://localhost:3000`):
+
+   ```env
+   VITE_BACKEND_URL="http://localhost:3000"
+   ```
+
 4. **Set up the database**
 
    ```bash
@@ -156,40 +163,48 @@ n10/
 1. Create a workflow with a webhook trigger
 2. Save the workflow to get the webhook URL
 3. Use the webhook URL to trigger workflows from external systems
-4. Webhook URL format: `https://your-domain.com/webhook/{workflow-id}`
+4. Webhook URL format: `https://your-domain.com/api/v1/webhook/{workflow-id}`
 
 ## 🔧 API Reference
 
+Base path: `/api/v1`
+
 ### Authentication Endpoints
 
-- `POST /auth/register` - User registration
-- `POST /auth/login` - User login
-- `POST /auth/logout` - User logout
+- `POST /api/v1/auth/register` - User registration
+- `POST /api/v1/auth/login` - User login
+- `POST /api/v1/auth/logout` - User logout
 
 ### Workflow Endpoints
 
-- `GET /workflows` - Get all user workflows
-- `POST /workflows/create` - Create new workflow
-- `PUT /workflows/:id` - Update workflow
-- `GET /workflows/:id` - Get specific workflow
-- `DELETE /workflows/:id` - Delete workflow
+- `GET /api/v1/workflows` - Get all user workflows
+- `POST /api/v1/workflows/create` - Create new workflow
+- `PUT /api/v1/workflows/:id` - Update workflow
+- `GET /api/v1/workflows/:id` - Get specific workflow
+- `DELETE /api/v1/workflows/:id` - Delete workflow
 
 ### Execution Endpoints
 
-- `POST /execute` - Execute workflow manually
-- `GET /execute/stream` - Stream execution updates (SSE)
-- `POST /webhook/:workflowId` - Trigger workflow via webhook
+- `POST /api/v1/execute` - Execute workflow manually
+- `GET /api/v1/execute` - Get recent executions
+- `GET /api/v1/execute/stream` - Stream execution updates (SSE)
+- `POST /api/v1/webhook/:workflowId` - Trigger workflow via webhook
 
 ### Credential Endpoints
 
-- `GET /credentials` - Get user credentials
-- `POST /credentials/create` - Create new credential
-- `PUT /credentials/:id` - Update credential
-- `DELETE /credentials/:id` - Delete credential
+- `GET /api/v1/credentials` - Get user credentials
+- `POST /api/v1/credentials/create` - Create new credential
+- `PUT /api/v1/credentials/:id` - Update credential
+- `DELETE /api/v1/credentials/:id` - Delete credential
+
+### Available Trigger Endpoints
+
+- `GET /api/v1/availableTrigger` - List available triggers
+- `POST /api/v1/availableTrigger` - Create/register a trigger
 
 ### Analytics Endpoints
 
-- `GET /analytics` - Get user analytics data
+- `GET /api/v1/analytics` - Get user analytics data
 
 ## 🛠️ Development
 
