@@ -4,6 +4,7 @@ import telegram from "../assets/telegram.svg"
 import whatsapp from "../assets/whatsapp.svg"
 import openai from "../assets/openai.svg"
 import resend from "../assets/resend.svg"
+import solana from "../assets/solana.png"
 
 export const TriggerNode = ({data} :{data: any}) => {
   const status = data.__status as ("IDLE"|"RUNNING"|"SUCCESS"|"FAILED") | undefined;
@@ -32,6 +33,7 @@ export const ActionNode = ({data} :{data: any}) => {
         {data.type === "openai" && <div className="flex items-center justify-center gap-2 "><img src={openai} alt="openai" className="w-6 h-6" /> <div className="font-kode text-xs">Send Message</div></div>}
         {data.type === "resend" && <img src={resend} alt="resend" className="w-6 h-6" />}
         {data.type === "agent" && <Bot className="w-6 h-6" />}
+        {data.type === "solana" && <img src={solana} alt="solana" className="w-6 h-6" />}
         {status === "RUNNING" && <Loader2 className="w-4 h-4 ml-1 animate-spin text-blue-500" />}
         {status === "SUCCESS" && <CheckCircle2 className="w-4 h-4 ml-1 text-green-500" />}
         {status === "FAILED" && <XCircle className="w-4 h-4 ml-1 text-red-500" />}

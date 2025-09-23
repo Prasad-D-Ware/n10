@@ -10,12 +10,14 @@ import telegram from "../assets/telegram.svg"
 import whatsapp from "../assets/whatsapp.svg"
 import openai from "../assets/openai.svg"
 import resend from "../assets/resend.svg"
+import solana from "../assets/solana.png"
 
 const logos = {
     telegram : telegram,
     whatsapp : whatsapp,
     openai : openai,
-    resend : resend
+    resend : resend,
+    solana : solana
 }
 
 interface CredentialsCardProps {

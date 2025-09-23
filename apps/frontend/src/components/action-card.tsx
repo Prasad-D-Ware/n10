@@ -3,6 +3,7 @@ import telegram from "../assets/telegram.svg"
 import whatsapp from "../assets/whatsapp.svg"
 import openai from "../assets/openai.svg"
 import resend from "../assets/resend.svg"
+import solana from "../assets/solana.png"
 import { Bot } from "lucide-react"
 
 export interface Action {
@@ -21,6 +22,7 @@ const logos: Record<string, string> = {
   whatsapp,
   openai,
   resend,
+  solana,
 }
 
 export function ActionCard({ action, onSelect }: ActionCardProps) {

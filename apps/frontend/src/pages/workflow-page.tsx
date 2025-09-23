@@ -46,6 +46,7 @@ import TgCredentials from "@/components/tg-credentials";
 import ResendCredential from "@/components/resend-credential";
 import WpCredentials from "@/components/wp-credentials";
 import { BACKEND_URL } from "@/lib/config";
+import SolanaCredential from "@/components/solana-credential";
 
 
 const nodeTypes = {
@@ -436,6 +437,30 @@ const WorkflowPage = () => {
           </div>
         </div>
       ),
+      solana: (fd, update) => (
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1">
+            <Label>Credential</Label>
+            <CredentialSelector appType="solana" value={fd.credential} onChange={(v) => update("credential", v)} />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label>Wallet Address</Label>
+            <Input
+              placeholder="U5eyyuMUzn8TvRaWnrdLj.."
+              value={fd.address || ""}
+              onChange={(e) => update("address", e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label>Amount</Label>
+            <Input
+              placeholder="0.001"
+              value={fd.amount || ""}
+              onChange={(e) => update("amount", e.target.value)}
+            />
+          </div>
+        </div>
+      ),
     },
   };
 
@@ -785,6 +810,7 @@ const WorkflowPage = () => {
                   { id: "openai", name: "OpenAI", type: "openai" },
                   { id: "resend", name: "Resend", type: "resend" },
                   { id: "agent", name: "AI-Agent", type: "agent" },
+                  { id: "solana", name: "Send Solana", type: "solana" },
                 ].map((app) => (
                   <ActionCard key={app.id} action={app} onSelect={handleSelectAction} />
                 ))}
@@ -848,6 +874,9 @@ const WorkflowPage = () => {
               )}
               {credSelectedApp === "resend" && (
                 <ResendCredential onDataChange={setCredData} />
+              )}
+              {credSelectedApp === "solana" && (
+                  <SolanaCredential onDataChange={setCredData} />
               )}
               <Button
                 className="font-kode w-full bg-orange-500"

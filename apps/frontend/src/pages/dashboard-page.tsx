@@ -29,12 +29,14 @@ import { Loader2 } from "lucide-react";
 import ExecutionsCards from "@/components/executions-card";
 import { WorkflowCards } from "@/components/workflows-card";
 import { BACKEND_URL } from "@/lib/config";
+import SolanaCredential from "@/components/solana-credential";
 
 const demoApplications = [
   { key: "telegram", name: "Telegram" },
   { key: "whatsapp", name: "WhatsApp" },
   { key: "openai", name: "OpenAI" },
   { key: "resend", name: "Resend (Mail)" },
+  { key: "solana", name: "Solana" },
 ];
 
 export interface Credentials {
@@ -290,6 +292,9 @@ const DashBoardPage = () => {
                   )}
                   {selectedApp === "resend" && (
                     <ResendCredential onDataChange={setCredData} />
+                  )}
+                  {selectedApp === "solana" && (
+                    <SolanaCredential onDataChange={setCredData} />
                   )}
                   <Button
                     className="font-kode w-full bg-orange-500"
