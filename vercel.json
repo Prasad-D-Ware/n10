@@ -1,5 +1,4 @@
 {
-  "root": "apps/frontend",
   "buildCommand": "bunx vite build",
   "outputDirectory": "dist",
   "rewrites": [
