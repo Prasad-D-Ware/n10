@@ -1,6 +1,6 @@
 {
-  "buildCommand": "bunx vite build",
-  "outputDirectory": "dist",
+  "buildCommand": "cd apps/frontend && bunx vite build",
+  "outputDirectory": "apps/frontend/dist",
   "rewrites": [
     {
       "source": "/(.*)",
