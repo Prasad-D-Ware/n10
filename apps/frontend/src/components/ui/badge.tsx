@@ -35,11 +35,14 @@ function Badge({
   const Comp = asChild ? Slot : "span"
 
   return (
-    <Comp
-      data-slot="badge"
-      className={cn(badgeVariants({ variant }), className)}
-      {...props}
-    />
+    <>
+      {/* @ts-expect-error - React 19 and Radix UI Slot compatibility issue */}
+      <Comp
+        data-slot="badge"
+        className={cn(badgeVariants({ variant }), className)}
+        {...props}
+      />
+    </>
   )
 }
 

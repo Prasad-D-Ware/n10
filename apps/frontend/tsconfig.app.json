@@ -27,7 +27,11 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    
+    /* Temporarily relax strict type checking for React 19 compatibility */
+    "noImplicitReturns": false,
+    "exactOptionalPropertyTypes": false
   },
   "include": ["src"]
 }

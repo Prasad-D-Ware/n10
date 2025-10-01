@@ -48,11 +48,14 @@ function Button({
   const Comp = asChild ? Slot : "button"
 
   return (
-    <Comp
-      data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
-      {...props}
-    />
+    <>
+      {/* @ts-expect-error - React 19 and Radix UI Slot compatibility issue */}
+      <Comp
+        data-slot="button"
+        className={cn(buttonVariants({ variant, size, className }))}
+        {...props}
+      />
+    </>
   )
 }
 

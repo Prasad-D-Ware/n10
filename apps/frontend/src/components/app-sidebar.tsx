@@ -1,4 +1,4 @@
-import { Home, LineChart, LogOut, Settings } from "lucide-react";
+import { Home, LineChart, LogOut } from "lucide-react";
 import n10Logo from "@/assets/n10-logo.png";
 
 import {

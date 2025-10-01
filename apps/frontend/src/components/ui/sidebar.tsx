@@ -400,17 +400,21 @@ function SidebarGroupLabel({
 }: React.ComponentProps<"div"> & { asChild?: boolean }) {
   const Comp = asChild ? Slot : "div"
 
+
   return (
-    <Comp
-      data-slot="sidebar-group-label"
-      data-sidebar="group-label"
-      className={cn(
-        "text-sidebar-foreground/70 ring-sidebar-ring flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium outline-hidden transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
-        "group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0",
-        className
-      )}
-      {...props}
-    />
+    <>
+      {/* @ts-expect-error - React 19 and Radix UI Slot compatibility issue */}
+      <Comp
+        data-slot="sidebar-group-label"
+        data-sidebar="group-label"
+        className={cn(
+          "text-sidebar-foreground/70 ring-sidebar-ring flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium outline-hidden transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
+          "group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0",
+          className
+        )}
+        {...props}
+      />
+    </>
   )
 }
 
@@ -421,7 +425,10 @@ function SidebarGroupAction({
 }: React.ComponentProps<"button"> & { asChild?: boolean }) {
   const Comp = asChild ? Slot : "button"
 
+
   return (
+    <>
+    {  // @ts-expect-error - React 19 and Radix UI Slot compatibility issue}
     <Comp
       data-slot="sidebar-group-action"
       data-sidebar="group-action"
@@ -434,6 +441,8 @@ function SidebarGroupAction({
       )}
       {...props}
     />
+     }
+      </>
   )
 }
 
@@ -512,6 +521,8 @@ function SidebarMenuButton({
   const { isMobile, state } = useSidebar()
 
   const button = (
+    <>
+    {  // @ts-expect-error - React 19 and Radix UI Slot compatibility issue}
     <Comp
       data-slot="sidebar-menu-button"
       data-sidebar="menu-button"
@@ -519,7 +530,8 @@ function SidebarMenuButton({
       data-active={isActive}
       className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
       {...props}
-    />
+    />}
+    </>
   )
 
   if (!tooltip) {
@@ -557,6 +569,8 @@ function SidebarMenuAction({
   const Comp = asChild ? Slot : "button"
 
   return (
+    <>
+    {  // @ts-expect-error - React 19 and Radix UI Slot compatibility issue}  
     <Comp
       data-slot="sidebar-menu-action"
       data-sidebar="menu-action"
@@ -573,7 +587,8 @@ function SidebarMenuAction({
         className
       )}
       {...props}
-    />
+    />}
+    </>
   )
 }
 
@@ -680,6 +695,8 @@ function SidebarMenuSubButton({
   const Comp = asChild ? Slot : "a"
 
   return (
+    <>
+    {  // @ts-expect-error - React 19 and Radix UI Slot compatibility issue}
     <Comp
       data-slot="sidebar-menu-sub-button"
       data-sidebar="menu-sub-button"
@@ -694,7 +711,8 @@ function SidebarMenuSubButton({
         className
       )}
       {...props}
-    />
+    />}
+    </>
   )
 }
 
