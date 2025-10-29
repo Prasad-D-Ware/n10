@@ -29,11 +29,12 @@ const Landing = () => {
   };
 
   const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
+    hidden: { y: 20, opacity: 0, filter : "blur(10px)" },
     visible: {
       y: 0,
       opacity: 1,
-      transition: { duration: 0.6 }
+      transition: { duration: 0.6},
+      filter: "blur(0px)"
     }
   };
 
@@ -100,11 +101,46 @@ const Landing = () => {
             className="text-5xl font-bold font-kode text-gray-900 dark:text-white leading-tight mb-6"
             variants={itemVariants}
           >
-            Unlock Powerful Automation
-            <span className="block text-orange-500">You Thought Was Out of Reach</span>
-            <span className="block text-2xl md:text-3xl font-normal text-gray-600 dark:text-gray-300 mt-4">
-              Now Just One Click Away!
-            </span>
+            {/* Top line: Unlock Powerful Automation */}
+            {["Unlock", "Powerful", "Automation"].map((word, idx) => (
+              <motion.span
+                key={word}
+                className="inline-block mr-2"
+                initial={{ y: 20, opacity: 0 ,filter : "blur(10px)"}}
+                animate={{ y: 0, opacity: 1 ,filter : "blur(0px)"}}
+                transition={{ delay: 0.2 * idx, duration: 0.6 }}
+              >
+                {word}
+              </motion.span>
+            ))}
+            {/* Middle line: You Thought Was Out of Reach, split into words and block */}
+            <div className="block text-orange-500">
+              {["You", "Thought", "Was", "Out", "of", "Reach"].map((word, idx) => (
+                <motion.span
+                  key={word}
+                  className="inline-block mr-2"
+                  initial={{ y: 20, opacity: 0 ,filter : "blur(10px)"}}
+                  animate={{ y: 0, opacity: 1 ,filter : "blur(0px)"}}
+                  transition={{ delay: 0.7 + 0.1 * idx, duration: 0.6 }}
+                >
+                  {word}
+                </motion.span>
+              ))}
+            </div>
+            {/* Last line: Now Just One Click Away! - split into words and block with own styles */}
+            <div className="block text-2xl md:text-3xl font-normal text-gray-600 dark:text-gray-300 mt-4">
+              {["Now", "Just", "One", "Click", "Away!"].map((word, idx) => (
+                <motion.span
+                  key={word}
+                  className="inline-block mr-2"
+                  initial={{ y: 20, opacity: 0 ,filter : "blur(10px)"}}
+                  animate={{ y: 0, opacity: 1 ,filter : "blur(0px)"}}
+                  transition={{ delay: 1.4 + 0.1 * idx, duration: 0.6 }}
+                >
+                  {word}
+                </motion.span>
+              ))}
+            </div>
           </motion.h1>
           
           <motion.div 
