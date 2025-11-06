@@ -809,7 +809,7 @@ const WorkflowPage = () => {
                   { id: "whatsapp", name: "WhatsApp", type: "whatsapp" },
                   { id: "openai", name: "OpenAI", type: "openai" },
                   { id: "resend", name: "Resend", type: "resend" },
-                  { id: "agent", name: "AI-Agent", type: "agent" },
+                  // { id: "agent", name: "AI-Agent", type: "agent" },
                   { id: "solana", name: "Send Solana", type: "solana" },
                 ].map((app) => (
                   <ActionCard key={app.id} action={app} onSelect={handleSelectAction} />
