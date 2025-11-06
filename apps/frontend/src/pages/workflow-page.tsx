@@ -631,10 +631,25 @@ const WorkflowPage = () => {
       setNodeStatuses(next);
   
       // subscribe to SSE
-      const es = new EventSource(`${BACKEND_URL}/execute/stream`);
+      const es = new EventSource(`${BACKEND_URL}/execute/stream`, {
+        withCredentials: true
+      });
+      
+      es.onopen = () => {
+        console.log("SSE connection opened");
+      };
+      
       es.onmessage = (ev) => {
         try {
           const event = JSON.parse(ev.data);
+          console.log("SSE event received:", event);
+          
+          // Handle connection confirmation
+          if (event.type === "connected") {
+            console.log("SSE connection confirmed:", event.message);
+            return;
+          }
+          
           if (!event?.executionId || event.executionId !== data.executionId) return;
           const nodeId = event.nodeId as string;
           const status = event.status as "RUNNING" | "SUCCESS" | "FAILED";
@@ -650,11 +665,13 @@ const WorkflowPage = () => {
               setIsExecuting(false);
             }
           }
-        } catch {
-          // ignore
+        } catch (error) {
+          console.error("Error parsing SSE message:", error);
         }
       };
-      es.onerror = () => {
+      
+      es.onerror = (error) => {
+        console.error("SSE connection error:", error);
         es.close();
         setIsExecuting(false);
       };
