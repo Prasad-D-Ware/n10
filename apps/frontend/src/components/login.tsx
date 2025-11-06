@@ -15,11 +15,13 @@ import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import logo from "../assets/n10-logo.png"
 import { BACKEND_URL } from "@/lib/config"
+import { Loader2 } from "lucide-react"
 
 export function Login() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -43,7 +45,7 @@ export function Login() {
 
       toast.success(data.message);
       localStorage.setItem("token" , data.token);
-      navigate("/dashboard");
+      navigate("/dashboard", { replace: true });
       // console.log("Login successful:", response.data)
       // Handle successful login here (e.g., redirect, store token, etc.)
     } catch (error) {
@@ -55,11 +57,25 @@ export function Login() {
   }
 
   useEffect(()=>{
-    const token = localStorage.getItem("token");
-    if(token){
-      navigate("/dashboard")
+    const checkAuth = () => {
+      const token = localStorage.getItem("token");
+      if(token){
+        navigate("/dashboard", { replace: true })
+      } else {
+        setIsCheckingAuth(false)
+      }
     }
+    
+    checkAuth()
   },[navigate])
+
+  if (isCheckingAuth) {
+    return (
+      <div className="h-screen flex items-center justify-center w-screen">
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <div className="h-screen flex items-center justify-center w-screen">
