@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import axios from "axios"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import logo from "../assets/n10-logo.png"
@@ -51,6 +51,13 @@ export function Signup() {
       setIsLoading(false)
     }
   }
+
+  useEffect(()=>{
+    const token = localStorage.getItem("token");
+    if(token){
+      navigate("/dashboard")
+    }
+  },[])
 
   return (
     <div className="h-screen flex items-center justify-center w-screen">
