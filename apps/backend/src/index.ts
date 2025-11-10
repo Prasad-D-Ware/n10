@@ -39,6 +39,12 @@ app.use(cors({
     }
 }));
 
+app.get("/",(req,res) => {
+    res.json({
+        message : "Healthy!"
+    })
+})
+
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/credentials", credentialRouter);
 app.use("/api/v1/workflows", workflowRouter);
