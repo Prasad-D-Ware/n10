@@ -1,0 +1,22 @@
+version: "3.8"
+services:
+  backend:
+    build :
+      context: ./apps/backend
+      dockerfile: Dockerfile
+    environment:
+      - DATABASE_URL="postgresql://user:password@host:5432/postgres"
+      - JWT_SECRET="123321"
+    ports:
+      - 3000:3000
+
+  frontend:
+    build :
+      context: ./apps/frontend
+      dockerfile: Dockerfile
+    environment:
+      - VITE_BACKEND_URL=http://localhost:3000/api/v1
+    ports:
+      - 5173:5173
+    depends_on:
+      - backend
