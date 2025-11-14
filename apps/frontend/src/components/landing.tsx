@@ -115,7 +115,7 @@ const Landing = () => {
             ))}
             {/* Middle line: You Thought Was Out of Reach, split into words and block */}
             <div className="block text-orange-500">
-              {["You", "Thought", "Was", "Out", "of", "Reach"].map((word, idx) => (
+              {["Which","You", "Thought", "Was", "Out", "of", "Reach"].map((word, idx) => (
                 <motion.span
                   key={word}
                   className="inline-block mr-2"
