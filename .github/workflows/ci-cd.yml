@@ -1,0 +1,29 @@
+name:  Deploy frontend backend to EC2
+
+on:
+  push:
+    branches: [ main ]
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: SSH into EC2
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          cd n10/
+          git pull origin main
+          bun install
+          pm2 restart backend
+          bun run build
+          sudo rm -rf /var/www/frontend/*
+          sudo cp -r apps/frontend/dist/* /var/www/frontend/
+          sudo systemctl restart nginx
+
+          
+    
