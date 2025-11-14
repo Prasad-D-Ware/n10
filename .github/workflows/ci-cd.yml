@@ -1,20 +1,20 @@
-name:  Deploy frontend backend to EC2
-
+name:  Deploy n10 to EC2
 on:
   push:
     branches: [ main ]
 jobs:
-  deploy-backend:
+  deploy-n10:
     runs-on: ubuntu-latest
 
     steps:
-
     - name: SSH into EC2
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port : 22
+        debug : true
         script: |
           cd n10/
           git pull origin main
