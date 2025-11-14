@@ -13,17 +13,17 @@ jobs:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        port : 22
-        debug : true
+        port: 22
+        debug: true
         script: |
+          export PATH="$HOME/.bun/bin:$PATH"
           cd n10/
           git pull origin main
           bun install
-          pm2 restart backend
           bun run build
+          pm2 restart backend
           sudo rm -rf /var/www/frontend/*
           sudo cp -r apps/frontend/dist/* /var/www/frontend/
           sudo systemctl restart nginx
 
-          
     
