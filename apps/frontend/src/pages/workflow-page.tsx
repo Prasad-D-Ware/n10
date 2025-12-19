@@ -292,7 +292,7 @@ const WorkflowPage = () => {
         </div>
       ),
       "webhook-trigger": () => {
-        const url = id ? `${BACKEND_URL}/webhook/${id}` : "";
+        const url = id ? `https://n10.prsd.dev${BACKEND_URL}/webhook/${id}` : "";
         const handleCopy = async () => {
           try {
             await navigator.clipboard.writeText(url);

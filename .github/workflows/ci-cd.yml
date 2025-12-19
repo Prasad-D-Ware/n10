@@ -1,4 +1,4 @@
-name:  Deploy n10 to EC2
+name:  Deploy n10 to Digital Ocean
 on:
   push:
     branches: [ main ]
@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: SSH into EC2
+    - name: SSH into Digital Ocean
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.HOST }}
@@ -19,11 +19,16 @@ jobs:
           export PATH="$HOME/.bun/bin:$PATH"
           cd n10/
           git pull origin main
-          bun install
-          bun run build
-          pm2 restart backend
-          sudo rm -rf /var/www/frontend/*
-          sudo cp -r apps/frontend/dist/* /var/www/frontend/
-          sudo systemctl restart nginx
+          bun install && bun turbo build
+          pm2 reload ecosystem.config.js || pm2 restart ecosystem.config.js
+          
+          sudo rm -rf /var/www/n10/*
+          sudo mkdir -p /var/www/n10/assets
+          sudo cp -r apps/frontend/dist/* /var/www/n10/
+          sudo chown -R www-data:www-data /var/www/n10/
+          sudo chmod -R 644 /var/www/n10/*
+          sudo chmod 755 /var/www/n10 /var/www/n10/assets
+          
+          sudo nginx -t && sudo systemctl reload nginx
 
     
