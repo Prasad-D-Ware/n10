@@ -2,6 +2,10 @@
 
 N10 is a powerful visual workflow automation platform that allows users to create, manage, and execute automated workflows through an intuitive drag-and-link interface. Built with modern web technologies, N10 enables seamless integration with popular services like WhatsApp, Telegram, OpenAI, and Resend.
 
+## 🎬 Demo
+
+https://github.com/user-attachments/assets/e8fc18cf-775a-4795-8011-d33919394449
+
 ## 🚀 Features
 
 ### Visual Workflow Builder
