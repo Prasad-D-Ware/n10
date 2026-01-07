@@ -56,42 +56,41 @@ export function ExecutionsCards({ executions }: ExecutionsCardsProps) {
 
   if (!executions || executions.length === 0) {
     return (
-      <div className="h-[600px] w-full flex justify-center items-center">
-        <div className="font-kode font-bold text-xl">No Executions Yet!</div>
+      <div className="h-[400px] sm:h-[600px] w-full flex justify-center items-center">
+        <div className="font-kode font-bold text-lg sm:text-xl text-center px-4">No Executions Yet!</div>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col gap-4 max-w-7xl">
+    <div className="flex flex-col gap-3 sm:gap-4 max-w-7xl">
       {(executions || []).map((exec) => (
         <Card key={exec.id} className="hover:shadow-md transition-shadow">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <Badge 
-                  variant={statusVariant(exec.status)} 
-                  className={`font-inter uppercase ${statusClassName(exec.status)}`}
-                >
-                  {exec.status}
-                </Badge>
-                <button
-                  onClick={() => navigate(`/workflows/${exec.workflow.id}`)}
-                  className="text-left truncate hover:underline font-semibold"
-                >
-                  {exec.workflow.name}
-                </button>
-              </div>
-              <div className="text-sm text-muted-foreground whitespace-nowrap">
-                Started {formatWhen(exec.started_at)}
-                {/* {exec.ended_at ? ` • Ended ${formatWhen(exec.ended_at)}` : ""} */}
-              </div>
-              <div>
-              {exec.ended_at && (
-                  <span className="ml-2 font-medium">
-                    Time duration : {formatExecutionTime(exec.started_at, exec.ended_at)}
-                  </span>
-                )}
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-start sm:items-center justify-between gap-2 sm:gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Badge 
+                    variant={statusVariant(exec.status)} 
+                    className={`font-inter uppercase text-[10px] sm:text-xs flex-shrink-0 ${statusClassName(exec.status)}`}
+                  >
+                    {exec.status}
+                  </Badge>
+                  <button
+                    onClick={() => navigate(`/workflows/${exec.workflow.id}`)}
+                    className="text-left truncate hover:underline font-semibold text-sm sm:text-base"
+                  >
+                    {exec.workflow.name}
+                  </button>
+                </div>
+                <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground sm:ml-auto">
+                  <span>{formatWhen(exec.started_at)}</span>
+                  {exec.ended_at && (
+                    <span className="font-medium">
+                      • {formatExecutionTime(exec.started_at, exec.ended_at)}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </CardContent>

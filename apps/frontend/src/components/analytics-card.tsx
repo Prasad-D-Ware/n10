@@ -37,22 +37,22 @@ export function AnalyticsCard({ analytics, className }: AnalyticsCardProps) {
   const successRate = totalExecutions > 0 ? (analytics.successfulExecutions / totalExecutions * 100) : 0
 
   return (
-    <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full ${className}`}>
+    <div className={`grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 w-full ${className}`}>
       {/* Total Workflows */}
       <Card className="hover:shadow-md transition-shadow">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
               Total Workflows
             </CardTitle>
-            <Workflow className="h-4 w-4 text-orange-500" />
+            <Workflow className="h-3 w-3 sm:h-4 sm:w-4 text-orange-500" />
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold font-kode text-orange-500">
+        <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+          <div className="text-xl sm:text-2xl font-bold font-kode text-orange-500">
             {analytics.totalWorkflows}
           </div>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 hidden sm:block">
             Active automation workflows
           </p>
         </CardContent>
@@ -60,79 +60,79 @@ export function AnalyticsCard({ analytics, className }: AnalyticsCardProps) {
 
       {/* Successful Executions */}
       <Card className="hover:shadow-md transition-shadow">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Successful Executions
+            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
+              Successful
             </CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-500" />
+            <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold font-kode text-green-500">
+        <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+          <div className="text-xl sm:text-2xl font-bold font-kode text-green-500">
             {analytics.successfulExecutions}
           </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            {successRate.toFixed(1)}% success rate
+          <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
+            {successRate.toFixed(1)}% rate
           </p>
         </CardContent>
       </Card>
 
       {/* Failed Executions */}
       <Card className="hover:shadow-md transition-shadow">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Failed Executions
+            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
+              Failed
             </CardTitle>
-            <XCircle className="h-4 w-4 text-red-500" />
+            <XCircle className="h-3 w-3 sm:h-4 sm:w-4 text-red-500" />
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold font-kode text-red-500">
+        <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+          <div className="text-xl sm:text-2xl font-bold font-kode text-red-500">
             {analytics.failedExecutions}
           </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            {totalExecutions > 0 ? ((analytics.failedExecutions / totalExecutions) * 100).toFixed(1) : 0}% failure rate
+          <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
+            {totalExecutions > 0 ? ((analytics.failedExecutions / totalExecutions) * 100).toFixed(1) : 0}% rate
           </p>
         </CardContent>
       </Card>
 
       {/* Average Execution Time */}
       <Card className="hover:shadow-md transition-shadow">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Avg Execution Time
+            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
+              Avg Time
             </CardTitle>
-            <Clock className="h-4 w-4 text-blue-500" />
+            <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500" />
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold font-kode text-blue-500">
+        <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+          <div className="text-xl sm:text-2xl font-bold font-kode text-blue-500">
             {formatExecutionTime(analytics.avgExecutionTime)}
           </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            Average workflow duration
+          <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 hidden sm:block">
+            Average duration
           </p>
         </CardContent>
       </Card>
 
       {/* Total Credentials */}
       <Card className="hover:shadow-md transition-shadow">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Credentials
+            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
+              Credentials
             </CardTitle>
-            <Key className="h-4 w-4 text-purple-500" />
+            <Key className="h-3 w-3 sm:h-4 sm:w-4 text-purple-500" />
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold font-kode text-purple-500">
+        <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+          <div className="text-xl sm:text-2xl font-bold font-kode text-purple-500">
             {analytics.totalCreds}
           </div>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 hidden sm:block">
             Connected integrations
           </p>
         </CardContent>
@@ -140,19 +140,19 @@ export function AnalyticsCard({ analytics, className }: AnalyticsCardProps) {
 
       {/* Success Rate Badge */}
       <Card className="hover:shadow-md transition-shadow">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Overall Performance
+            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
+              Performance
             </CardTitle>
-            <TrendingUp className="h-4 w-4 text-orange-500" />
+            <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-orange-500" />
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-2">
+        <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
             <Badge 
               variant={successRate >= 80 ? "default" : successRate >= 60 ? "secondary" : "destructive"}
-              className={`font-kode text-sm ${
+              className={`font-kode text-xs sm:text-sm w-fit ${
                 successRate >= 80 
                   ? "bg-green-500 hover:bg-green-600" 
                   : successRate >= 60 
@@ -162,12 +162,12 @@ export function AnalyticsCard({ analytics, className }: AnalyticsCardProps) {
             >
               {successRate.toFixed(1)}%
             </Badge>
-            <span className="text-sm text-muted-foreground">
+            <span className="text-[10px] sm:text-sm text-muted-foreground hidden sm:inline">
               {successRate >= 80 ? "Excellent" : successRate >= 60 ? "Good" : "Needs Attention"}
             </span>
           </div>
-          <p className="text-xs text-muted-foreground mt-2">
-            Based on {totalExecutions} total executions
+          <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 sm:mt-2">
+            {totalExecutions} executions
           </p>
         </CardContent>
       </Card>

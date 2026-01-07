@@ -56,33 +56,36 @@ export function WorkflowCards({ workflows, onWorkflowDeleted }: WorkflowCardsPro
 
   if(workflows.length === 0){
     return (
-      <div className="h-[600px] w-full flex justify-center items-center">
-        <div className="font-kode font-bold text-xl">No Workflows Yet! Create Now!</div>
+      <div className="h-[400px] sm:h-[600px] w-full flex justify-center items-center">
+        <div className="font-kode font-bold text-lg sm:text-xl text-center px-4">No Workflows Yet! Create Now!</div>
       </div>
     )
   }
   return (
-    <div className="flex flex-col gap-4 max-w-7xl">
+    <div className="flex flex-col gap-3 sm:gap-4 max-w-7xl">
       {workflows.map((workflow) => (
         <Card key={workflow.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={()=>navigate(`/workflows/${workflow.id}`)}>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className={`w-2 h-2 rounded-full ${workflow.enabled ? "bg-green-500" : "bg-gray-400"}`} />
-                <h3 className="font-semibold text-foreground truncate">{workflow.name}</h3>
+              <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${workflow.enabled ? "bg-green-500" : "bg-gray-400"}`} />
+                <h3 className="font-semibold text-foreground truncate text-sm sm:text-base">{workflow.name}</h3>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="text-sm text-muted-foreground whitespace-nowrap">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap hidden sm:block">
                   Updated {formatLastUpdated(workflow.updated_at)} | Created {formatCreated(workflow.created_at)}
+                </div>
+                <div className="text-xs text-muted-foreground sm:hidden">
+                  {formatLastUpdated(workflow.updated_at)}
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                  className="h-7 w-7 sm:h-8 sm:w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 flex-shrink-0"
                   onClick={(e) => handleDeleteWorkflow(workflow.id, e)}
                   disabled={deletingId === workflow.id}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </div>
             </div>

@@ -99,11 +99,11 @@ export function CredentialsCards({ credentials, onEdit, onDelete, onSave }: Cred
           const currentValue = (editedValuesById[credential.id]?.[key] ?? (originalValue as string)) as string
           const displayValue = isVisible || isEditing ? currentValue : maskValue(currentValue)
           return (
-            <div key={key} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+            <div key={key} className="flex flex-col sm:flex-row sm:items-center justify-between p-2 sm:p-3 bg-muted/50 rounded-lg gap-2 sm:gap-0">
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm font-medium capitalize font-inter">{key.replace(/([A-Z])/g, " $1").trim()}</span>
-                  <Badge variant="outline" className="text-xs font-inter">
+                <div className="flex items-center gap-1 sm:gap-2 mb-1 flex-wrap">
+                  <span className="text-xs sm:text-sm font-medium capitalize font-inter">{key.replace(/([A-Z])/g, " $1").trim()}</span>
+                  <Badge variant="outline" className="text-[10px] sm:text-xs font-inter">
                     {key === "apikey" ? "API Key" : key === "accessToken" ? "Access Token" : "Business ID"}
                   </Badge>
                 </div>
@@ -112,25 +112,25 @@ export function CredentialsCards({ credentials, onEdit, onDelete, onSave }: Cred
                   onChange={(e) => handleFieldChange(credential.id, key, e.target.value)}
                   disabled={!isEditing}
                   type="text"
-                  className="font-mono"
+                  className="font-mono text-xs sm:text-sm"
                 />
               </div>
-              <div className="flex items-center gap-1 ml-3">
+              <div className="flex items-center gap-1 sm:ml-3 justify-end">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => toggleKeyVisibility(credential.id, key)}
-                  className="h-8 w-8 p-0"
+                  className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                 >
-                  {isVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {isVisible ? <EyeOff className="h-3 w-3 sm:h-4 sm:w-4" /> : <Eye className="h-3 w-3 sm:h-4 sm:w-4" />}
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => copyToClipboard(currentValue)}
-                  className="h-8 w-8 p-0"
+                  className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                 >
-                  <Copy className="h-4 w-4" />
+                  <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </div>
             </div>
@@ -142,8 +142,8 @@ export function CredentialsCards({ credentials, onEdit, onDelete, onSave }: Cred
 
   if(credentials.length === 0){
     return (
-      <div className="h-[600px] w-full flex justify-center items-center">
-        <div className="font-kode font-bold text-xl">No Credentials Yet! Create Credentials Now!</div>
+      <div className="h-[400px] sm:h-[600px] w-full flex justify-center items-center">
+        <div className="font-kode font-bold text-lg sm:text-xl text-center px-4">No Credentials Yet! Create Credentials Now!</div>
       </div>
     )
   }
@@ -152,50 +152,48 @@ export function CredentialsCards({ credentials, onEdit, onDelete, onSave }: Cred
     <div className="space-y-2">
       {credentials.map((credential) => (
         <Card key={credential.id} className="w-full">
-          <CardHeader className="pb-1">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex gap-4">
-                    <img src={logos[credential.application as keyof typeof logos]} height={40} width={40}/>
-                    <div>
-                  <h3 className="font-semibold text-lg font-kode">{credential.name}</h3>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <Badge variant="secondary" className="font-inter">{credential.application}</Badge>
-                    <span className="text-sm text-muted-foreground">
-                      Last Updated {new Date(credential.updated_at).toLocaleDateString()}
+          <CardHeader className="pb-1 px-3 sm:px-6">
+            <div className="flex items-start sm:items-center justify-between gap-2">
+              <div className="flex gap-2 sm:gap-4 items-center flex-1 min-w-0">
+                <img src={logos[credential.application as keyof typeof logos]} className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0"/>
+                <div className="min-w-0">
+                  <h3 className="font-semibold text-base sm:text-lg font-kode truncate">{credential.name}</h3>
+                  <div className="flex flex-wrap items-center gap-1 sm:gap-2 mt-0.5">
+                    <Badge variant="secondary" className="font-inter text-xs">{credential.application}</Badge>
+                    <span className="text-xs sm:text-sm text-muted-foreground">
+                      Updated {new Date(credential.updated_at).toLocaleDateString()}
                     </span>
-                  </div>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                 {editingById[credential.id] ? (
-                  <Button variant="default" size="sm" onClick={() => handleSave(credential)} className="h-8">
+                  <Button variant="default" size="sm" onClick={() => handleSave(credential)} className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3">
                     Save
                   </Button>
                 ) : (
-                  <Button variant="outline" size="sm" onClick={() => handleStartEdit(credential)} className="h-8">
-                    <Edit className="h-4 w-4 mr-1" />
-                    Edit
+                  <Button variant="outline" size="sm" onClick={() => handleStartEdit(credential)} className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3">
+                    <Edit className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Edit</span>
                   </Button>
                 )}
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => onDelete?.(credential.id)}
-                  className="h-8 text-destructive hover:text-destructive"
+                  className="h-7 sm:h-8 text-destructive hover:text-destructive text-xs sm:text-sm px-2 sm:px-3"
                 >
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Delete
+                  <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
+                  <span className="hidden sm:inline">Delete</span>
                 </Button>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="pt-0">
+          <CardContent className="pt-0 px-3 sm:px-6">
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value={credential.id} className="border-none">
                 <AccordionTrigger className="hover:no-underline py-1">
-                  <span className="text-sm font-kode font-extrabold text-orange-500">View Credentials</span>
+                  <span className="text-xs sm:text-sm font-kode font-extrabold text-orange-500">View Credentials</span>
                 </AccordionTrigger>
                 <AccordionContent className="pt-0.5">{renderCredentialData(credential)}</AccordionContent>
               </AccordionItem>

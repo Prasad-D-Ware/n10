@@ -71,14 +71,14 @@ export function Login() {
 
   if (isCheckingAuth) {
     return (
-      <div className="h-screen flex items-center justify-center w-screen">
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      <div className="h-screen flex items-center justify-center w-screen px-4">
+        <Loader2 className="h-6 w-6 animate-spin text-orange-500" />
       </div>
     )
   }
 
   return (
-    <div className="h-screen flex items-center justify-center w-screen">
+    <div className="h-screen flex items-center justify-center w-screen px-4">
     <Card className="w-full max-w-sm mx-auto">
       <CardHeader>
         <img src={logo} alt="Logo" className="h-30 self-center mx-auto"/>

@@ -229,26 +229,26 @@ const DashBoardPage = () => {
     }
   };
   return (
-    <div className="m-16 mx-auto max-w-7xl w-full">
-      <div className="flex justify-between">
+    <div className="p-4 sm:p-6 md:p-0 md:m-16 mx-auto max-w-7xl w-full">
+      <div className="flex flex-col sm:flex-row sm:justify-between gap-4 sm:gap-0">
         <div className="">
-          <div className="text-xl font-bold font-kode text-orange-500">
+          <div className="text-lg sm:text-xl font-bold font-kode text-orange-500">
             Dashboard
           </div>
-          <div className="font-inter">
+          <div className="font-inter text-sm sm:text-base">
             All the workflows, credentials and executions you have access to
           </div>
         </div>
-        <div className="flex items-center gap-2 font-kode">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 font-kode">
           <Button
             onClick={() => navigate("/workflows")}
-            className="bg-orange-500"
+            className="bg-orange-500 w-full sm:w-auto"
           >
             Create Workflow
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-orange-500 ">Create Credentials</Button>
+              <Button className="bg-orange-500 w-full sm:w-auto">Create Credentials</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
@@ -317,7 +317,7 @@ const DashBoardPage = () => {
         </div>
       </div>
 
-      <div className="mt-10 h-full w-full">
+      <div className="mt-6 sm:mt-10 h-full w-full">
         <Tabs defaultValue="workflows" className="font-inter">
           <TabsList>
             <TabsTrigger value="workflows">Workflows</TabsTrigger>
@@ -326,7 +326,7 @@ const DashBoardPage = () => {
           </TabsList>
           <TabsContent value="workflows">
           {loadingWorkflow ? (
-              <div className="h-[600px] w-full justify-center flex items-center">
+              <div className="h-[400px] sm:h-[600px] w-full justify-center flex items-center">
                 <Loader2 className="animate-spin text-orange-500" />
               </div>
             ) :
@@ -334,7 +334,7 @@ const DashBoardPage = () => {
           </TabsContent>
           <TabsContent value="credentials">
             {loading ? (
-              <div className="h-[600px] w-full justify-center flex items-center">
+              <div className="h-[400px] sm:h-[600px] w-full justify-center flex items-center">
                 <Loader2 className="animate-spin text-orange-500" />
               </div>
             ) : (
@@ -347,7 +347,7 @@ const DashBoardPage = () => {
           </TabsContent>
           <TabsContent value="executions">
           {loadingExecutions ? (
-              <div className="h-[600px] w-full justify-center flex items-center">
+              <div className="h-[400px] sm:h-[600px] w-full justify-center flex items-center">
                 <Loader2 className="animate-spin text-orange-500" />
               </div>
             ) : (

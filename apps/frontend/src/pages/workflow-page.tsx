@@ -685,7 +685,7 @@ const WorkflowPage = () => {
 
   if (loading) {
     return (
-      <div className="m-16 mx-auto max-w-7xl w-full flex items-center justify-center h-[850px]">
+      <div className="p-4 sm:p-6 md:p-0 md:m-16 mx-auto max-w-7xl w-full flex items-center justify-center h-[60vh] sm:h-[850px]">
         <div className="text-center">
           <Loader2 className="animate-spin text-orange-500"/>
         </div>
@@ -694,22 +694,22 @@ const WorkflowPage = () => {
   }
 
   return (
-    <div className="m-16 mx-auto max-w-7xl w-full">
+    <div className="p-4 sm:p-6 md:p-0 md:m-16 mx-auto max-w-7xl w-full">
       {/* Header*/}
-      <div className="flex h-16 items-center justify-between ">
-        <div className="flex gap-2 items-center">
-          <div className="font-kode font-bold text-orange-500">Workflow </div>
-          <Input placeholder="workflow name" className="border-transparent" value={workflowName} onChange={(e) => setWorkflowName(e.target.value)}/>
+      <div className="flex flex-col sm:flex-row gap-4 sm:gap-0 sm:h-16 items-start sm:items-center justify-between mb-4 sm:mb-0">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 items-start sm:items-center w-full sm:w-auto">
+          <div className="font-kode font-bold text-orange-500 text-sm sm:text-base">Workflow</div>
+          <Input placeholder="workflow name" className="border-transparent w-full sm:w-auto" value={workflowName} onChange={(e) => setWorkflowName(e.target.value)}/>
         </div>
-        <div className="flex items-center  gap-5">
-          <div className="font-inter flex gap-2 items-center ">
-            Enabled : <SlideToggle enabled={enable} setEnable={setEnable} />
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5 w-full sm:w-auto">
+          <div className="font-inter flex gap-2 items-center text-sm sm:text-base">
+            Enabled: <SlideToggle enabled={enable} setEnable={setEnable} />
             <span className="ml-2 text-sm opacity-70">
               {enable ? "On" : "Off"}
             </span>
           </div>
           <Button 
-            className="font-kode font-bold bg-orange-500 hover:bg-orange-700 hover:text-white hover:cursor-pointer" 
+            className="font-kode font-bold bg-orange-500 hover:bg-orange-700 hover:text-white hover:cursor-pointer w-full sm:w-auto" 
             onClick={handleSaveWorkflow}
             disabled={saving}
           >
@@ -724,7 +724,7 @@ const WorkflowPage = () => {
         </div>
       </div>
 
-      <div className="w-full h-full pb-2">
+      <div className="w-full h-[60vh] sm:h-[70vh] md:h-[80vh] pb-2">
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -745,32 +745,33 @@ const WorkflowPage = () => {
           // maxZoom={1}
         >
           <Panel position="bottom-center">
-            <Button className="bg-orange-500 hover:bg-orange-700 hover:text-white hover:cursor-pointer" onClick={handleExecuteWorkflow} disabled={isExecuting}>
+            <Button className="bg-orange-500 hover:bg-orange-700 hover:text-white hover:cursor-pointer text-xs sm:text-sm" onClick={handleExecuteWorkflow} disabled={isExecuting}>
               {isExecuting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Executing...
+                  <Loader2 className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+                  <span className="hidden sm:inline">Executing...</span>
+                  <span className="sm:hidden">...</span>
                 </>
               ) : (
                 <>
-                  <FlaskConical/>
-                  Execute
+                  <FlaskConical className="h-3 w-3 sm:h-4 sm:w-4"/>
+                  <span className="hidden sm:inline ml-1">Execute</span>
                 </>
               )}
             </Button>
           </Panel>
-          <MiniMap/>
+          <MiniMap className="hidden sm:block"/>
           <Panel
             position="top-center"
-            className="bg-orange-500 font-kode px-2 py-1 border border-black  rounded-md dark:text-black"
+            className="bg-orange-500 font-kode px-2 py-1 border border-black rounded-md dark:text-black text-xs sm:text-sm"
           >
             Workflow Editor
           </Panel>
-          <Panel position="top-left" className="bg-transparent shadow-none font-inter"> {nodes.length > 0 && <span className="text-sm opacity-70">Drag and connect nodes to create your workflow</span>}</Panel>
+          <Panel position="top-left" className="bg-transparent shadow-none font-inter hidden sm:block"> {nodes.length > 0 && <span className="text-sm opacity-70">Drag and connect nodes to create your workflow</span>}</Panel>
           <Background />
           <Panel position="top-right" className="bg-transparent shadow-none">
             <Button
-              className="border p-5 rounded-lg h-10 w-10 flex items-center justify-center border-orange-500"
+              className="border p-3 sm:p-5 rounded-lg h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center border-orange-500"
               variant={"ghost"}
               onMouseDown={(e) => e.stopPropagation()}
               onClick={(e) => {
@@ -778,18 +779,18 @@ const WorkflowPage = () => {
                 openPicker(nodes.length === 0 ? "trigger" : "action");
               }}
             >
-              <Plus className="h-4 w-4"/>
+              <Plus className="h-3 w-3 sm:h-4 sm:w-4"/>
             </Button>
           </Panel>
           {nodes.length === 0 && (
             <div className="flex items-center justify-center flex-col">
               <button
-                className="z-10 border border-dashed border-black dark:border-white h-20 w-20 flex items-center justify-center text-3xl rounded-xl"
+                className="z-10 border border-dashed border-black dark:border-white h-16 w-16 sm:h-20 sm:w-20 flex items-center justify-center text-2xl sm:text-3xl rounded-xl"
                 onClick={() => openPicker("trigger")}
               >
                 +
               </button>
-              <div className="font-kode mt-2">Add First Step</div>
+              <div className="font-kode mt-2 text-sm sm:text-base">Add First Step</div>
             </div>
           )}
           <Controls orientation="horizontal"/>
