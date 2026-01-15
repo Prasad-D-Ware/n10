@@ -201,7 +201,7 @@ const Landing = () => {
               return (
                 <motion.div
                   key={app.name}
-                  className="absolute w-9 h-9 sm:w-11 sm:h-11 md:w-14 md:h-14 lg:w-16 lg:h-16 bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl md:rounded-2xl shadow-lg flex items-center justify-center p-1 sm:p-1.5 md:p-2"
+                  className="gradient-button absolute w-9 h-9 sm:w-11 sm:h-11 md:w-14 md:h-14 lg:w-16 lg:h-16 bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl md:rounded-2xl shadow-lg flex items-center justify-center p-1 sm:p-1.5 md:p-2"
                   style={{
                     left: `calc(50% + ${x}px - ${offset}px)`,
                     top: `calc(50% + ${y}px - ${offset}px)`,
