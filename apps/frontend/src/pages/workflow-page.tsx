@@ -47,6 +47,7 @@ import ResendCredential from "@/components/resend-credential";
 import WpCredentials from "@/components/wp-credentials";
 import { BACKEND_URL } from "@/lib/config";
 import SolanaCredential from "@/components/solana-credential";
+import { useSidebar } from "@/components/ui/sidebar";
 
 
 const nodeTypes = {
@@ -91,6 +92,7 @@ const WorkflowPage = () => {
   const { theme } = useTheme();
   const navigate = useNavigate();
   const { id } = useParams();
+  const { state: sidebarState, isMobile } = useSidebar();
   const [rfInstance, setRfInstance] = useState<ReactFlowInstance<Node, Edge> | null>(null);
   const [pendingViewport, setPendingViewport] = useState<{ x: number; y: number; zoom: number } | null>(null);
   const [nodeStatuses, setNodeStatuses] = useState<Record<string, "IDLE" | "RUNNING" | "SUCCESS" | "FAILED">>({});
@@ -685,7 +687,7 @@ const WorkflowPage = () => {
 
   if (loading) {
     return (
-      <div className="p-4 sm:p-6 md:p-0 md:m-16 mx-auto max-w-7xl w-full flex items-center justify-center h-[60vh] sm:h-[850px]">
+      <div className="fixed inset-0 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="animate-spin text-orange-500"/>
         </div>
@@ -693,38 +695,61 @@ const WorkflowPage = () => {
     );
   }
 
+  const headerLeftOffset = isMobile 
+    ? "left-0" 
+    : sidebarState === "expanded" 
+      ? "md:left-[17rem]" 
+      : "md:left-[5rem]";
+
   return (
-    <div className="p-4 sm:p-6 md:p-0 md:m-16 mx-auto max-w-7xl w-full">
-      {/* Header*/}
-      <div className="flex flex-col sm:flex-row gap-4 sm:gap-0 sm:h-16 items-start sm:items-center justify-between mb-4 sm:mb-0">
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 items-start sm:items-center w-full sm:w-auto">
-          <div className="font-kode font-bold text-orange-500 text-sm sm:text-base">Workflow</div>
-          <Input placeholder="workflow name" className="border-transparent w-full sm:w-auto" value={workflowName} onChange={(e) => setWorkflowName(e.target.value)}/>
-        </div>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5 w-full sm:w-auto">
-          <div className="font-inter flex gap-2 items-center text-sm sm:text-base">
-            Enabled: <SlideToggle enabled={enable} setEnable={setEnable} />
-            <span className="ml-2 text-sm opacity-70">
-              {enable ? "On" : "Off"}
-            </span>
+    <div className="fixed inset-0 w-full h-full">
+      <div className={`gradient-shadow-only fixed top-4 ${headerLeftOffset} right-4 z-50 h-14 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border border-border rounded-lg shadow-lg transition-all duration-200 ease-linear`}>
+        <div className="h-full px-4 flex items-center justify-between gap-4 max-w-full">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="font-kode font-bold text-orange-500 text-sm whitespace-nowrap">Workflow</div>
+            <Input 
+              placeholder="workflow name" 
+              className="border-transparent h-8 text-sm flex-1 max-w-xs" 
+              value={workflowName} 
+              onChange={(e) => setWorkflowName(e.target.value)}
+            />
           </div>
-          <Button 
-            className="font-kode font-bold bg-orange-500 hover:bg-orange-700 hover:text-white hover:cursor-pointer w-full sm:w-auto" 
-            onClick={handleSaveWorkflow}
-            disabled={saving}
-          >
-            {saving ? (
-              <div className="px-1.5 py-1">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              </div>
-            ) : (
-              "Save"
-            )}
-          </Button>
+          <Panel position="top-center" className="bg-transparent shadow-none font-inter hidden sm:block"> {nodes.length > 0 && <span className="text-sm opacity-70">Drag and connect nodes to create your workflow</span>}</Panel>
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <div className="font-inter flex gap-2 items-center text-xs sm:text-sm">
+              <span className="hidden sm:inline">Enabled:</span>
+              <SlideToggle enabled={enable} setEnable={setEnable} />
+              <span className="text-xs opacity-70 whitespace-nowrap">
+                {enable ? "On" : "Off"}
+              </span>
+            </div>
+            <Button 
+              className="font-kode font-bold bg-orange-500 hover:bg-orange-700 hover:text-white hover:cursor-pointer h-8 px-3 text-xs sm:text-sm" 
+              onClick={handleSaveWorkflow}
+              disabled={saving}
+            >
+              {saving ? (
+                <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+              ) : (
+                "Save"
+              )}
+            </Button>
+            <Button
+              className="border p-2 sm:p-3 rounded-lg h-6 w-6 sm:h-9 sm:w-9 flex items-center justify-center border-orange-500"
+              variant={"ghost"}
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                openPicker(nodes.length === 0 ? "trigger" : "action");
+              }}
+            >
+              <Plus className="h-3 w-3 sm:h-4 sm:w-4"/>
+            </Button>
+          </div>
         </div>
       </div>
 
-      <div className="w-full h-[60vh] sm:h-[70vh] md:h-[80vh] pb-2">
+      <div className="w-full h-full">
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -745,7 +770,7 @@ const WorkflowPage = () => {
           // maxZoom={1}
         >
           <Panel position="bottom-center">
-            <Button className="bg-orange-500 hover:bg-orange-700 hover:text-white hover:cursor-pointer text-xs sm:text-sm" onClick={handleExecuteWorkflow} disabled={isExecuting}>
+            <Button className="gradient-shadow-only bg-orange-500 hover:bg-orange-700 hover:text-white hover:cursor-pointer text-xs sm:text-sm" onClick={handleExecuteWorkflow} disabled={isExecuting}>
               {isExecuting ? (
                 <>
                   <Loader2 className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
@@ -761,27 +786,7 @@ const WorkflowPage = () => {
             </Button>
           </Panel>
           <MiniMap className="hidden sm:block"/>
-          <Panel
-            position="top-center"
-            className="bg-orange-500 font-kode px-2 py-1 border border-black rounded-md dark:text-black text-xs sm:text-sm"
-          >
-            Workflow Editor
-          </Panel>
-          <Panel position="top-left" className="bg-transparent shadow-none font-inter hidden sm:block"> {nodes.length > 0 && <span className="text-sm opacity-70">Drag and connect nodes to create your workflow</span>}</Panel>
           <Background />
-          <Panel position="top-right" className="bg-transparent shadow-none">
-            <Button
-              className="border p-3 sm:p-5 rounded-lg h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center border-orange-500"
-              variant={"ghost"}
-              onMouseDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                openPicker(nodes.length === 0 ? "trigger" : "action");
-              }}
-            >
-              <Plus className="h-3 w-3 sm:h-4 sm:w-4"/>
-            </Button>
-          </Panel>
           {nodes.length === 0 && (
             <div className="flex items-center justify-center flex-col">
               <button
@@ -796,7 +801,7 @@ const WorkflowPage = () => {
           <Controls orientation="horizontal"/>
         </ReactFlow>
       </div>
-    {/* Picker Sheet */}
+      
       <Sheet open={isPickerOpen} onOpenChange={setIsPickerOpen}>
         <SheetContent>
           {pickerMode === "trigger" ? (
@@ -838,7 +843,6 @@ const WorkflowPage = () => {
         </SheetContent>
       </Sheet>
 
-   {/* Node Config Dialog */}
       <Dialog open={isConfigOpen} onOpenChange={setIsConfigOpen}>
         <DialogContent>
           <DialogHeader>
@@ -863,7 +867,6 @@ const WorkflowPage = () => {
         </DialogContent>
       </Dialog>
 
-    {/* Credential Dialog */}
       <Dialog open={isCredDialogOpen} onOpenChange={setIsCredDialogOpen}>
         <DialogContent>
           <DialogHeader>
