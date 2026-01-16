@@ -242,13 +242,13 @@ const DashBoardPage = () => {
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 font-kode">
           <Button
             onClick={() => navigate("/workflows")}
-            className="bg-orange-500 w-full sm:w-auto"
+            className="bg-orange-500 w-full sm:w-auto hover:bg-orange-700 text-white"
           >
             Create Workflow
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-orange-500 w-full sm:w-auto">Create Credentials</Button>
+              <Button className="bg-orange-500 w-full sm:w-auto hover:bg-orange-700 text-white">Create Credentials</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>

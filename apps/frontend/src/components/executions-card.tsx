@@ -63,7 +63,7 @@ export function ExecutionsCards({ executions }: ExecutionsCardsProps) {
   }
 
   return (
-    <div className="flex flex-col gap-3 sm:gap-4 max-w-7xl">
+    <div className="flex flex-col gap-2 max-w-7xl">
       {(executions || []).map((exec) => (
         <Card key={exec.id} className="hover:shadow-md transition-shadow">
           <CardContent className="p-3 sm:p-4">

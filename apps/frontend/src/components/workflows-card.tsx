@@ -62,13 +62,13 @@ export function WorkflowCards({ workflows, onWorkflowDeleted }: WorkflowCardsPro
     )
   }
   return (
-    <div className="flex flex-col gap-3 sm:gap-4 max-w-7xl">
+    <div className="flex flex-col gap-2 max-w-7xl">
       {workflows.map((workflow) => (
         <Card key={workflow.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={()=>navigate(`/workflows/${workflow.id}`)}>
-          <CardContent className="p-3 sm:p-4">
+          <CardContent className="p-3 sm:px-6 ">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${workflow.enabled ? "bg-green-500" : "bg-gray-400"}`} />
+                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${workflow.enabled ? "bg-green-500" : "bg-gray-400"} `} />
                 <h3 className="font-semibold text-foreground truncate text-sm sm:text-base">{workflow.name}</h3>
               </div>
               <div className="flex items-center gap-2 sm:gap-3">
