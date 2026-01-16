@@ -770,7 +770,7 @@ const WorkflowPage = () => {
           // maxZoom={1}
         >
           <Panel position="bottom-center">
-            <Button className="gradient-shadow-only bg-orange-500 hover:bg-orange-700 hover:text-white hover:cursor-pointer text-xs sm:text-sm" onClick={handleExecuteWorkflow} disabled={isExecuting}>
+            <Button className=" bg-orange-500 hover:bg-orange-700 text-white hover:cursor-pointer text-xs sm:text-sm" onClick={handleExecuteWorkflow} disabled={isExecuting}>
               {isExecuting ? (
                 <>
                   <Loader2 className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
