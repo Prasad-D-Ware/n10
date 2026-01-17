@@ -1,4 +1,4 @@
-import { Home, LineChart, LogOut } from "lucide-react";
+import { Home, LineChart, LogOut, PanelLeft } from "lucide-react";
 import n10Logo from "@/assets/n10-logo.png";
 
 import {
@@ -36,7 +36,7 @@ const items = [
 ];
 
 export function AppSidebar() {
-  const { state } = useSidebar();
+  const { state, toggleSidebar } = useSidebar();
 
   const handleLogut = async () =>{
     try {
@@ -56,18 +56,29 @@ export function AppSidebar() {
   return (
     <Sidebar variant="floating" collapsible="icon">
       <SidebarHeader>
-        <div className="flex justify-between">
-          {/* <SidebarGroupLabel className="text-xl font-bold text-black ">N10</SidebarGroupLabel> */}
+        <div className="flex items-center justify-between gap-2">
           <SidebarGroupLabel>
             <img src={n10Logo} alt="N10 Logo" className="h-10 w-auto" />
           </SidebarGroupLabel>
-          <SidebarTrigger />
+          {state === "expanded" && (
+            <SidebarTrigger className="border border-orange-500/30 hover:bg-orange-500/10 hover:border-orange-500 size-8 flex-shrink-0 transition-colors" />
+          )}
         </div>
       </SidebarHeader>
-      <SidebarContent>
-        <SidebarGroup>
+      <SidebarContent className="flex flex-col">
+        <SidebarGroup className="flex-1">
           <SidebarGroupContent>
             <SidebarMenu>
+              {state === "collapsed" && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton 
+                    onClick={toggleSidebar}
+                    className="justify-center border border-orange-500/30 hover:bg-orange-500/10 hover:border-orange-500 transition-colors"
+                  >
+                    <PanelLeft className="size-4" />
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
@@ -85,8 +96,8 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        <SidebarFooter className="absolute bottom-3">
-          <div className="flex justify-end gap-22 items-center">
+        <SidebarFooter className="mt-auto">
+          <div className="flex justify-between items-center gap-2">
             <ModeToggle />
             {state === "expanded" && (
               <Button variant={"outline"} onClick={handleLogut} className="bg-orange-500 dark:bg-orange-500 text-white">

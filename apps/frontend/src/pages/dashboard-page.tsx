@@ -30,6 +30,7 @@ import ExecutionsCards from "@/components/executions-card";
 import { WorkflowCards } from "@/components/workflows-card";
 import { BACKEND_URL } from "@/lib/config";
 import SolanaCredential from "@/components/solana-credential";
+import { useSidebar } from "@/components/ui/sidebar";
 
 const demoApplications = [
   { key: "telegram", name: "Telegram" },
@@ -55,6 +56,7 @@ export interface Credentials {
 
 const DashBoardPage = () => {
   const navigate = useNavigate();
+  const { state: sidebarState, isMobile } = useSidebar();
   const [applications] = useState(demoApplications);
   const [selectedApp, setSelectedApp] = useState("");
   const [credName, setCredName] = useState("");
@@ -228,28 +230,33 @@ const DashBoardPage = () => {
       toast.error(error?.response?.data?.message || "Delete failed");
     }
   };
+  const headerLeftOffset = isMobile 
+    ? "left-0" 
+    : sidebarState === "expanded" 
+      ? "md:left-[17rem]" 
+      : "md:left-[5rem]";
+
   return (
-    <div className="p-4 sm:p-6 md:p-0 md:m-16 mx-auto max-w-7xl w-full">
-      <div className="flex flex-col sm:flex-row sm:justify-between gap-4 sm:gap-0">
-        <div className="">
-          <div className="text-lg sm:text-xl font-bold font-kode text-orange-500">
-            Dashboard
+    <div className="w-full h-full">
+      <div className={`gradient-shadow-only fixed top-4 ${headerLeftOffset} right-4 z-50 h-14 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border border-border rounded-lg shadow-lg transition-all duration-200 ease-linear`}>
+        <div className="h-full px-4 flex items-center justify-between gap-4 max-w-full">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="font-kode font-bold text-orange-500 text-sm whitespace-nowrap">Dashboard</div>
+            <div className="font-inter text-xs sm:text-sm opacity-70 hidden sm:block truncate">
+              All the workflows, credentials and executions you have access to
+            </div>
           </div>
-          <div className="font-inter text-sm sm:text-base">
-            All the workflows, credentials and executions you have access to
-          </div>
-        </div>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 font-kode">
-          <Button
-            onClick={() => navigate("/workflows")}
-            className="bg-orange-500 w-full sm:w-auto hover:bg-orange-700 text-white"
-          >
-            Create Workflow
-          </Button>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-orange-500 w-full sm:w-auto hover:bg-orange-700 text-white">Create Credentials</Button>
-            </DialogTrigger>
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            <Button
+              onClick={() => navigate("/workflows")}
+              className="font-kode font-bold bg-orange-500 hover:bg-orange-700 hover:text-white hover:cursor-pointer h-8 px-3 text-xs sm:text-sm hidden sm:flex"
+            >
+              Create Workflow
+            </Button>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="font-kode font-bold bg-orange-500 hover:bg-orange-700 hover:text-white hover:cursor-pointer h-8 px-3 text-xs sm:text-sm">Create Credentials</Button>
+              </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle className="font-kode font-bold text-orange-500">
@@ -314,10 +321,18 @@ const DashBoardPage = () => {
               </div>
             </DialogContent>
           </Dialog>
+          <Button
+            onClick={() => navigate("/workflows")}
+            className="font-kode font-bold bg-orange-500 hover:bg-orange-700 hover:text-white hover:cursor-pointer h-8 px-3 text-xs sm:text-sm sm:hidden"
+          >
+            Create Workflow
+          </Button>
+          </div>
         </div>
       </div>
 
-      <div className="mt-6 sm:mt-10 h-full w-full">
+      <div className="pt-20 sm:pt-24 p-4 sm:p-6 md:p-0 md:mt-20 md:mb-16 mx-auto max-w-7xl w-full transition-all duration-200 ease-linear">
+        <div className="mt-6 sm:mt-10 h-full w-full">
         <Tabs defaultValue="workflows" className="font-inter">
           <TabsList>
             <TabsTrigger value="workflows">Workflows</TabsTrigger>
@@ -355,6 +370,7 @@ const DashBoardPage = () => {
             )}
           </TabsContent>
         </Tabs>
+        </div>
       </div>
     </div>
   );
