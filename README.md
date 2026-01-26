@@ -4,7 +4,7 @@ N10 is a powerful visual workflow automation platform that allows users to creat
 
 ## 🎬 Demo
 
-https://github.com/user-attachments/assets/e8fc18cf-775a-4795-8011-d33919394449
+https://github.com/user-attachments/assets/e2744ae3-80f7-41e1-82d2-963f43c2887f
 
 ## 🚀 Features
 
